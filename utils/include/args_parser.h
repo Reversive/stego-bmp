@@ -1,10 +1,12 @@
 #ifndef _ARGS_PARSER_H
 #define _ARGS_PARSER_H
+#include <stdio.h>
+#include <stdlib.h>
 
-typedef enum {EMBED = 0, EXTRACT} ACTION;
-typedef enum {LSB1 = 0, LSB4, LSBI} STEG_MODE;
-typedef enum {AES128 = 0, AES192, AES256, DES} ALGO_MODE;
-typedef enum {ECB = 0, CFB, OFB, CBC} BLOCK_MODE;
+typedef enum {NO_ACTION = -1, EMBED, EXTRACT} ACTION;
+typedef enum {NO_STEG = -1, LSB1, LSB4, LSBI} STEG_MODE;
+typedef enum {NO_ALGO = -1, AES128, AES192, AES256, DES} ALGO_MODE;
+typedef enum {NO_BLOCK = -1, ECB, CFB, OFB, CBC} BLOCK_MODE;
 
 typedef struct steg_configuration_t {
 	ACTION action;
@@ -16,5 +18,13 @@ typedef struct steg_configuration_t {
 	BLOCK_MODE block_mode;
 	char *enc_password;
 } steg_configuration; 
+
+typedef steg_configuration * steg_configuration_ptr;
+
+extern steg_configuration_ptr steg_config;
+
+steg_configuration_ptr init_steg_config();
+steg_configuration_ptr parse_options(int argc, char *argv[]);
+
 
 #endif
