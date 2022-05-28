@@ -1,5 +1,19 @@
 #include "include/args_parser.h"
 
+static struct option long_opts[] =
+{
+	{"embed", NO_ARG, 0, 'e'},
+	{"extract", NO_ARG, 0, 'r'},
+	{"in", REQ_ARG, 0, 'i'},
+	{"p", REQ_ARG, 0, 'p'},
+	{"out", REQ_ARG, 0, 'o'},
+	{"steg", REQ_ARG, 0, 's'},
+	{"a", REQ_ARG, 0, 'a'},
+	{"m", REQ_ARG, 0, 'm'},
+	{"pass", REQ_ARG, 0, 'j'}
+};
+
+
 steg_configuration_ptr init_steg_config()
 {
 	steg_configuration_ptr steg_config = malloc(sizeof(steg_configuration));
@@ -25,5 +39,20 @@ steg_configuration_ptr parse_options(
 ) 
 {
 	steg_configuration_ptr steg_config = init_steg_config();
+	int option;
+	while((option = getopt_long(argc, argv, "eri:p:o:s:a:m:j:", long_opts, NULL)) != -1)
+	{
+		switch (option)
+		{
+		case 'e':
+			printf("Mode is embed\n");
+			break;
+		case 'r':
+			printf("Mode is extract\n");
+			break;
+		default:
+			break;
+		}
+	}
 	return steg_config;
 }

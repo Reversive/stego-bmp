@@ -2,7 +2,9 @@
 #define _ARGS_PARSER_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <getopt.h>
 
+enum {NO_ARG = 0, OPT_ARG, REQ_ARG} LONG_OPT_OPTS;
 typedef enum {NO_ACTION = -1, EMBED, EXTRACT} ACTION;
 typedef enum {NO_STEG = -1, LSB1, LSB4, LSBI} STEG_MODE;
 typedef enum {NO_ALGO = -1, AES128, AES192, AES256, DES} ALGO_MODE;
