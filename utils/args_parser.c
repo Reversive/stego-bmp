@@ -1,16 +1,20 @@
 #include "include/args_parser.h"
 
+
+static int embed_flag, extract_flag;
+
 static struct option long_opts[] =
 {
-	{"embed", NO_ARG, 0, 'e'},
-	{"extract", NO_ARG, 0, 'r'},
-	{"in", REQ_ARG, 0, 'i'},
-	{"p", REQ_ARG, 0, 'p'},
-	{"out", REQ_ARG, 0, 'o'},
-	{"steg", REQ_ARG, 0, 's'},
-	{"a", REQ_ARG, 0, 'a'},
-	{"m", REQ_ARG, 0, 'm'},
-	{"pass", REQ_ARG, 0, 'j'}
+	{"embed", no_argument, &embed_flag, 0},
+	{"extract", no_argument, &extract_flag, 0},
+	{"in", required_argument, NULL, 'i'},
+	{"p", required_argument, NULL, 'p'},
+	{"out", required_argument, NULL, 'o'},
+	{"steg", required_argument, NULL, 's'},
+	{"a", required_argument, NULL, 'a'},
+	{"m", required_argument, NULL, 'm'},
+	{"pass", required_argument, NULL, 'j'},
+	{0, 0, 0, 0}
 };
 
 
@@ -40,19 +44,48 @@ steg_configuration_ptr parse_options(
 {
 	steg_configuration_ptr steg_config = init_steg_config();
 	int option;
-	while((option = getopt_long(argc, argv, "eri:p:o:s:a:m:j:", long_opts, NULL)) != -1)
+	while((option = getopt_long_only(argc, argv, "eri:p:o:s:a:m:j:", long_opts, NULL)) != -1)
 	{
 		switch (option)
 		{
-		case 'e':
-			printf("Mode is embed\n");
+		case 0:
+			// Flag cases.
 			break;
-		case 'r':
-			printf("Mode is extract\n");
+		case 'i':
+			steg_config->in_file_path = optarg;
+        	printf ("option -in (-i) with value `%s'\n", optarg);
+			break;
+		case 'p':
+			steg_config->bmp_carrier_path = optarg;
+			printf ("option -p with value `%s'\n", optarg);
+			break;
+		case 'o':
+			steg_config->bmp_out_path = optarg;
+			printf ("option -out (-o) with value `%s'\n", optarg);
+			break;
+		case 's':
+			break;
+		case 'a':
+			break;
+		case 'm':
+			break;
+		case 'j':
+			steg_config->enc_password = optarg;
+			printf ("option -pass (-j) with value `%s'\n", optarg);
 			break;
 		default:
+			fprintf(stderr, "Invalid argument options\n");
+            exit(-1);
 			break;
 		}
 	}
+
+	if(embed_flag && extract_flag)
+	{
+		printf("Can't use extract and embed at the same time, please use one or the other.\n");
+		free(steg_config);
+		exit(-1);
+	}
+
 	return steg_config;
 }
