@@ -2,6 +2,8 @@
 #define _ARGS_PARSER_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <getopt.h>
 
 typedef enum {NO_ACTION = -1, EMBED, EXTRACT} ACTION;

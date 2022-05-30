@@ -8,7 +8,6 @@ int main(
 )
 {
 	steg_config = parse_options(argc, argv);
-	printf("%s\n", steg_config->enc_password);
 	free(steg_config);
 	return 0;
 }

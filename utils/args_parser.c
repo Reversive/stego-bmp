@@ -2,6 +2,19 @@
 
 
 static int embed_flag, extract_flag;
+static char *steg_options[3] = {"LSB1", "LSB4", "LSBI"};
+static char *algo_options[4] = {"AES128", "AES192", "AES256", "DES"};
+static char *block_options[4] = {"ECB", "CFB", "OFB", "CBC"};
+
+int iequals(const char* a, const char* b){
+    unsigned int size1 = strlen(a);
+    if (strlen(b) != size1)
+        return 0;
+    for (unsigned int i = 0; i < size1; i++)
+        if (tolower(a[i]) != tolower(b[i]))
+            return 0;
+    return 1;
+}
 
 static struct option long_opts[] =
 {
@@ -16,7 +29,6 @@ static struct option long_opts[] =
 	{"pass", required_argument, NULL, 'j'},
 	{0, 0, 0, 0}
 };
-
 
 steg_configuration_ptr init_steg_config()
 {
@@ -33,8 +45,20 @@ steg_configuration_ptr init_steg_config()
 	steg_config->steg_mode 			= NO_STEG;
 	steg_config->algo_mode 			= NO_ALGO;
 	steg_config->block_mode 		= NO_BLOCK;
-	steg_config->enc_password 		= "secret";
+	steg_config->enc_password 		= NULL;
 	return steg_config;
+}
+
+int parse_string_arg(char *input, char **options, size_t size, int default_value)
+{
+	for(int i = 0; i < size; i++)
+	{
+		if(iequals(input, options[i]))
+		{
+			return i;
+		}
+	}
+	return default_value;
 }
 
 steg_configuration_ptr parse_options(
@@ -53,21 +77,21 @@ steg_configuration_ptr parse_options(
 			break;
 		case 'i':
 			steg_config->in_file_path = optarg;
-        	printf ("option -in (-i) with value `%s'\n", optarg);
 			break;
 		case 'p':
 			steg_config->bmp_carrier_path = optarg;
-			printf ("option -p with value `%s'\n", optarg);
 			break;
 		case 'o':
 			steg_config->bmp_out_path = optarg;
-			printf ("option -out (-o) with value `%s'\n", optarg);
 			break;
 		case 's':
+			steg_config->steg_mode = parse_string_arg(optarg, steg_options, 3, NO_STEG);
 			break;
 		case 'a':
+			steg_config->algo_mode = parse_string_arg(optarg, algo_options, 4, NO_ALGO);
 			break;
 		case 'm':
+			steg_config->block_mode = parse_string_arg(optarg, block_options, 4, NO_BLOCK);
 			break;
 		case 'j':
 			steg_config->enc_password = optarg;
@@ -75,7 +99,7 @@ steg_configuration_ptr parse_options(
 			break;
 		default:
 			fprintf(stderr, "Invalid argument options\n");
-            exit(-1);
+			exit(-1);
 			break;
 		}
 	}
