@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "logger.h"
 #include <getopt.h>
 
 enum ERROR_CODES

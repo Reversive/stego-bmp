@@ -34,7 +34,7 @@ steg_configuration_ptr init_steg_config()
     steg_configuration_ptr steg_config = malloc(sizeof(steg_configuration));
     if (steg_config == NULL)
     {
-        // TO-DO: Logging
+        log(ERROR, "Insufficient memory to allocate POSIX arguments.\n");
         exit(-1);
     }
     steg_config->action = NO_ACTION;
