@@ -7,11 +7,11 @@
 #include "logger.h"
 #include <getopt.h>
 
-enum ERROR_CODES
+enum
 {
-    STATUS_SUCCESS,
-    STATUS_ERROR
-};
+    STATUS_ERROR = -1,
+    STATUS_SUCCESS
+} ERROR_CODES;
 
 typedef enum
 {

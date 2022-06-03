@@ -18,6 +18,21 @@ int iequals(const char *a, const char *b)
 
 void print_usage()
 {
+    printf("./stego-bmp [ POSIX style options ] \n"
+           "POSIX style options: \n"
+           "\t-embed Specifies that information will be hidden. \n"
+           "\t\t-in [IN FILE PATH] Specifies the file to hide. \n"
+           "\t\t-p [BITMAP FILE PATH] Specifies the bitmap carrier file. \n"
+           "\t\t-out [BITMAP OUTPUT PATH] Specifies the output bmp file with the embedded file. \n"
+           "\t\t-steg [LSB1 | LSB4 | LSBI] Specifies the steganography algorithm (1 bit LSB, 4 bit LSB, Enhanced LSB). \n"
+           "\t-extract Specifies that information will be extracted. \n"
+           "\t\t-p [BITMAP FILE PATH] Specifies the bitmap carrier file. \n"
+           "\t\t-out [FILE OUTPUT PATH] Specifies the output extracted file. \n"
+           "\t\t-steg [LSB1 | LSB4 | LSBI] Specifies the steganography algorithm (1 bit LSB, 4 bit LSB, Enhanced LSB). \n"
+           "\tOptional arguments:\n"
+           "\t\t-a [AES128 | AES192 | AES256 | DES] Specifies the hashing algorithm. \n"
+           "\t\t-m [ECB | CFB | OFB | CBC] Specifies the block cypher. \n"
+           "\t\t-pass [PASSWORD] Encryption password. \n");
 }
 
 static struct option long_opts[] =
@@ -68,6 +83,11 @@ steg_configuration_ptr parse_options(
     int argc,
     char *argv[])
 {
+    if (argc == 1)
+    {
+        print_usage();
+        exit(-1);
+    }
     steg_configuration_ptr steg_config = init_steg_config();
     int option;
     while ((option = getopt_long_only(argc, argv, "eri:p:o:s:a:m:j:", long_opts, NULL)) != -1)
@@ -100,6 +120,7 @@ steg_configuration_ptr parse_options(
             break;
         default:
             fprintf(stderr, "Invalid argument option.\n");
+            free(steg_config);
             exit(-1);
             break;
         }
@@ -119,6 +140,7 @@ steg_configuration_ptr parse_options(
          steg_config->steg_mode == NO_STEG))
     {
         printf("Missing arguments for embedding, make sure to provide -in <file> -p <bitmapfile> -out <bitmapfile> -steg <LSB1 | LSB4 | LSBI>\n");
+        free(steg_config);
         exit(-1);
     }
 
@@ -128,6 +150,7 @@ steg_configuration_ptr parse_options(
          steg_config->steg_mode == NO_STEG))
     {
         printf("Missing arguments for extracting, make sure to provide -p <bitmapfile> -out <bitmapfile> -steg <LSB1 | LSB4 | LSBI>\n");
+        free(steg_config);
         exit(-1);
     }
 
