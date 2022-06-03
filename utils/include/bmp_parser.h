@@ -61,6 +61,6 @@ typedef struct bitmap_metadata
 
 typedef bitmap_metadata *bitmap_metadata_ptr;
 
-bitmap_metadata_ptr bitmap_read_metadata(char *bmp_file_path);
+bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr);
 
 #endif

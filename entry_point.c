@@ -1,5 +1,6 @@
 #include "include/entry_point.h"
 
+FILE *carrier_fptr;
 steg_configuration_ptr steg_config;
 bitmap_metadata_ptr bmp_metadata;
 
@@ -15,6 +16,10 @@ void exit_clean_up(int err_code)
         free(bmp_metadata);
         bmp_metadata = NULL;
     }
+    if (carrier_fptr != NULL)
+    {
+        fclose(carrier_fptr);
+    }
     exit(err_code);
 }
 
@@ -23,7 +28,14 @@ int main(
     char *argv[])
 {
     steg_config = parse_options(argc, argv);
-    bmp_metadata = bitmap_read_metadata(steg_config->bmp_carrier_path);
+    carrier_fptr = fopen(steg_config->bmp_carrier_path, "rw");
+    if (fptr == NULL)
+    {
+        log(ERROR, "%s\n", "Invalid carrier file path.");
+        exit_clean_up(STATUS_ERROR);
+    }
+
+    bmp_metadata = bitmap_read_metadata(carrier_fptr);
     if (bmp_metadata == NULL)
     {
         exit_clean_up(STATUS_ERROR);
@@ -31,6 +43,7 @@ int main(
 
     bitmap_header header = bmp_metadata->header;
     bitmap_info info = bmp_metadata->info;
+
     printf("BitmapHeader:\n");
     printf("  Header:     %c%c (0x%2x)\n", header.magic.header[0], header.magic.header[1], header.magic.id);
     printf("  Size:       0x%8x\n", header.size);
