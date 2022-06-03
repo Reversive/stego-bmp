@@ -1,2 +1,2 @@
 CC = gcc 
-CFLAGS = -g -Wall -std=c99
+CFLAGS = -Wall -Wextra -pedantic-errors -std=c99

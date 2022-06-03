@@ -16,6 +16,10 @@ int iequals(const char *a, const char *b)
     return 1;
 }
 
+void print_usage()
+{
+}
+
 static struct option long_opts[] =
     {
         {"embed", no_argument, &embed_flag, 1},
@@ -34,7 +38,7 @@ steg_configuration_ptr init_steg_config()
     steg_configuration_ptr steg_config = malloc(sizeof(steg_configuration));
     if (steg_config == NULL)
     {
-        log(ERROR, "Insufficient memory to allocate POSIX arguments.\n");
+        log(ERROR, "%s\n", "Insufficient memory to allocate POSIX arguments.");
         exit(-1);
     }
     steg_config->action = NO_ACTION;
@@ -50,7 +54,7 @@ steg_configuration_ptr init_steg_config()
 
 int parse_string_arg(char *input, char **options, size_t size, int default_value)
 {
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
         if (iequals(input, options[i]))
         {
