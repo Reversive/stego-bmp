@@ -1,6 +1,6 @@
 #include "include/entry_point.h"
 
-FILE *carrier_fptr;
+FILE *carrier_fptr, *in_fptr;
 steg_configuration_ptr steg_config;
 bitmap_metadata_ptr bmp_metadata;
 
@@ -23,6 +23,30 @@ void exit_clean_up(int err_code)
     exit(err_code);
 }
 
+const char *get_filename_ext(const char *filename)
+{
+    const char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename)
+        return "";
+    return dot;
+}
+
+const uint32_t get_file_size(FILE *fp)
+{
+    // Go to end
+    fseek(fp, 0L, SEEK_END);
+    long size = ftell(fp);
+    // Reset ptr
+    fseek(fp, 0L, SEEK_SET);
+    return size;
+}
+
+void copy_file_content(FILE *fp, char *buff)
+{
+    char c;
+    for (int i = 0; EOF != (c = fgetc(fp)); i++)
+        buff[i] = c;
+}
 int main(
     int argc,
     char *argv[])
@@ -34,34 +58,26 @@ int main(
         log(ERROR, "%s\n", "Invalid carrier file path.");
         exit_clean_up(STATUS_ERROR);
     }
-
     bmp_metadata = bitmap_read_metadata(carrier_fptr);
     if (bmp_metadata == NULL)
     {
         exit_clean_up(STATUS_ERROR);
     }
 
-    bitmap_header header = bmp_metadata->header;
-    bitmap_info info = bmp_metadata->info;
+    in_fptr = fopen(steg_config->in_file_path, "rw");
+    if (in_fptr == NULL)
+    {
+        log(ERROR, "%s\n", "Invalid in file path.");
+        exit_clean_up(STATUS_ERROR);
+    }
 
-    printf("BitmapHeader:\n");
-    printf("  Header:     %c%c (0x%2x)\n", header.magic.header[0], header.magic.header[1], header.magic.id);
-    printf("  Size:       0x%8x\n", header.size);
-    printf("  Reserved 0: 0x%4x\n", header.reserved[0]);
-    printf("  Reserved 1: 0x%4x\n", header.reserved[1]);
-    printf("  Offset:     0x%8x\n", header.offset);
-    printf("  BitmapInfoHeader:\n");
-    printf("    Size:            0x%x\n", info.header.size);
-    printf("    Width:           0x%x\n", info.header.width);
-    printf("    Height:          0x%x\n", info.header.height);
-    printf("    Planes:          0x%2x\n", info.header.planes);
-    printf("    BitCount:        0x%2x\n", info.header.bit_count);
-    printf("    Compression:     0x%2x\n", info.header.compression);
-    printf("    SizeImage:       0x%x\n", info.header.size_image);
-    printf("    XPelsPerMeter:   0x%x\n", info.header.x_pels_per_meter);
-    printf("    YPelsPerMeter:   0x%x\n", info.header.y_pels_per_meter);
-    printf("    UsedColors:      0x%2x\n", info.header.used_colors);
-    printf("    ImportantColors: 0x%2x\n", info.header.important_colors);
+    uint32_t file_size = get_file_size(in_fptr);
+    const char *ext = get_filename_ext(steg_config->in_file_path);
+    char *buff = calloc(4 + file_size + strlen(ext) + 1, sizeof(char));
+    memcpy(buff, &file_size, 4);
+    copy_file_content(in_fptr, buff + 4);
+    memcpy(buff + file_size + 4, ext, strlen(ext));
+    printf("%s", buff + 4);
+
     exit_clean_up(STATUS_SUCCESS);
-    return 0;
 }
