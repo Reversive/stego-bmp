@@ -154,7 +154,7 @@ steg_configuration_ptr parse_options(
         exit(-1);
     }
 
-    if ((steg_config->algo_mode || steg_config->block_mode))
+    if ((steg_config->algo_mode != NO_ALGO || steg_config->block_mode != NO_BLOCK))
     {
         if (steg_config->enc_password == NULL)
         {
