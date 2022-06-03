@@ -29,7 +29,7 @@ int main(
 {
     steg_config = parse_options(argc, argv);
     carrier_fptr = fopen(steg_config->bmp_carrier_path, "rw");
-    if (fptr == NULL)
+    if (carrier_fptr == NULL)
     {
         log(ERROR, "%s\n", "Invalid carrier file path.");
         exit_clean_up(STATUS_ERROR);
