@@ -20,33 +20,26 @@ void exit_clean_up(int err_code)
     {
         fclose(carrier_fptr);
     }
+    if (in_fptr != NULL)
+    {
+        fclose(in_fptr);
+    }
     exit(err_code);
 }
 
-const char *get_filename_ext(const char *filename)
+char *generate_payload(const char *in_file_path, size_t *payload_size)
 {
-    const char *dot = strrchr(filename, '.');
-    if (!dot || dot == filename)
-        return "";
-    return dot;
+    uint32_t file_size = get_file_size(in_fptr);
+    const char *ext = get_filename_ext(in_file_path);
+    *payload_size = sizeof(uint32_t) + file_size + strlen(ext) + 1;
+    char *buff = calloc(*payload_size, sizeof(char));
+    uint32_t be_file_size = htonl(file_size);
+    memcpy(buff, &be_file_size, sizeof(uint32_t));
+    copy_file_content(in_fptr, buff + sizeof(uint32_t));
+    memcpy(buff + file_size + sizeof(uint32_t), ext, strlen(ext));
+    return buff;
 }
 
-const uint32_t get_file_size(FILE *fp)
-{
-    // Go to end
-    fseek(fp, 0L, SEEK_END);
-    long size = ftell(fp);
-    // Reset ptr
-    fseek(fp, 0L, SEEK_SET);
-    return size;
-}
-
-void copy_file_content(FILE *fp, char *buff)
-{
-    char c;
-    for (int i = 0; EOF != (c = fgetc(fp)); i++)
-        buff[i] = c;
-}
 int main(
     int argc,
     char *argv[])
@@ -71,13 +64,12 @@ int main(
         exit_clean_up(STATUS_ERROR);
     }
 
-    uint32_t file_size = get_file_size(in_fptr);
-    const char *ext = get_filename_ext(steg_config->in_file_path);
-    char *buff = calloc(4 + file_size + strlen(ext) + 1, sizeof(char));
-    memcpy(buff, &file_size, 4);
-    copy_file_content(in_fptr, buff + 4);
-    memcpy(buff + file_size + 4, ext, strlen(ext));
-    printf("%s", buff + 4);
-
+    size_t payload_size;
+    char *payload = generate_payload(steg_config->in_file_path, &payload_size);
+    for (size_t i = 0; i < payload_size; i++)
+    {
+        printf("\\%02hhx", (unsigned char)payload[i]);
+    }
+    free(payload);
     exit_clean_up(STATUS_SUCCESS);
 }
