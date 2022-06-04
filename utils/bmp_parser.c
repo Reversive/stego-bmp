@@ -110,6 +110,7 @@ unsigned char *bitmap_load_pixels(
             data[start + 2] = raw_data[j + 2];
         }
     }
+    free(raw_data);
 
     return data;
 }

@@ -71,6 +71,11 @@ void exit_clean_up(int err_code)
     }
     if (bmp_metadata != NULL)
     {
+        if (bmp_metadata->pixels != NULL)
+        {
+            free(bmp_metadata->pixels);
+            bmp_metadata->pixels = NULL;
+        }
         free(bmp_metadata);
         bmp_metadata = NULL;
     }
