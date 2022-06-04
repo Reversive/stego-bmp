@@ -4,6 +4,13 @@
 
 void init_password_data(password_data *password_data)
 {
-    const char *password = (const unsigned char *)password_data->password;
-    EVP_BytesToKey(EVP_aes_128_cbc(), EVP_md5(), (char *)0, password, strlen(password), 1, password_data->key, password_data->iv);
+    EVP_BytesToKey(
+        EVP_aes_128_cbc(),
+        EVP_md5(),
+        (const unsigned char *)0,
+        (const unsigned char *)password_data->password,
+        strlen(password_data->password),
+        1,
+        (unsigned char *)password_data->key,
+        (unsigned char *)password_data->iv);
 }
