@@ -4,9 +4,6 @@
 #include <string.h>
 #include <openssl/evp.h>
 
-#define MAX_KEY_SIZE 32
-#define BLOCK_SIZE 16
-
 typedef const EVP_CIPHER *(*cypher)(void);
 
 static const cypher cyphers[4][4] = {{EVP_aes_128_ecb, EVP_aes_128_cfb, EVP_aes_128_ofb, EVP_aes_128_cbc},
@@ -17,8 +14,8 @@ static const cypher cyphers[4][4] = {{EVP_aes_128_ecb, EVP_aes_128_cfb, EVP_aes_
 typedef struct password_data
 {
     char *password;
-    unsigned char key[MAX_KEY_SIZE];
-    unsigned char iv[BLOCK_SIZE];
+    unsigned char* key;
+    unsigned char* iv;
     cypher cypher;
 } password_data;
 

@@ -1,6 +1,9 @@
 #include "./include/ssl_utils.h"
 
 
+int KEY_SIZE[] = {16,24,32,8};
+int BLOCK_SIZE[] = {16,16,16,8};
+
 int encrypt(password_data *password_data, unsigned char* plain_in, unsigned char * cypher_out){
     
     EVP_CIPHER_CTX *ctx;
@@ -85,11 +88,16 @@ int decrypt(password_data *password_data, unsigned char* cypher_in, int cypher_l
 }
 
 
-
+void init_password_data_arrs(password_data *password_data, ALGO_MODE algo_mode){
+    password_data->iv = malloc(BLOCK_SIZE[algo_mode]);
+    password_data->key = malloc(KEY_SIZE[algo_mode]);
+}
 
 void init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_MODE block_mode)
 {
     password_data->cypher = cyphers[algo_mode][block_mode];
+    init_password_data_arrs(password_data,algo_mode);
+    printf("ALGO: %d\n\n",algo_mode);
     EVP_BytesToKey(
         (password_data->cypher)(),
         EVP_sha256(),

@@ -46,6 +46,7 @@ typedef enum
     CBC = 3
 } BLOCK_MODE;
 
+
 typedef struct steg_configuration_t
 {
     ACTION action;
