@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "logger.h"
+#include <math.h>
 
 #pragma pack(push, 1)
 
@@ -41,10 +42,6 @@ typedef struct bitmap_info_header
     uint32_t y_pels_per_meter;
     uint32_t used_colors;
     uint32_t important_colors;
-    uint32_t red_mask;
-    uint32_t green_mask;
-    uint32_t blue_mask;
-    uint32_t alpha_mask;
 } bitmap_info_header;
 
 typedef union bitmap_info
@@ -53,14 +50,22 @@ typedef union bitmap_info
     bitmap_info_header header;
 } bitmap_info;
 
+typedef struct rgb
+{
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+} rgb;
+
 typedef struct bitmap_metadata
 {
     bitmap_header header;
     bitmap_info info;
+    unsigned char *pixels;
 } bitmap_metadata;
 
 typedef bitmap_metadata *bitmap_metadata_ptr;
 
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr);
-
+unsigned char *bitmap_load_pixels(FILE *fptr, uint64_t file_size, bitmap_header *header, bitmap_info *info);
 #endif

@@ -1,7 +1,6 @@
 #include "./include/ssl_utils.h"
-#include <string.h>
 
-void init_password_data(password_data *password_data,ALGO_MODE algo_mode, BLOCK_MODE block_mode)
+void init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_MODE block_mode)
 {
     password_data->cypher = cyphers[algo_mode][block_mode];
     EVP_BytesToKey(
@@ -12,9 +11,7 @@ void init_password_data(password_data *password_data,ALGO_MODE algo_mode, BLOCK_
         strlen(password_data->password),
         1,
         (unsigned char *)password_data->key,
-        (unsigned char *)password_data->iv
-    );
+        (unsigned char *)password_data->iv);
 
-    printf("%s // %s",password_data->key, password_data->iv);
+    printf("%s // %s", password_data->key, password_data->iv);
 }
-

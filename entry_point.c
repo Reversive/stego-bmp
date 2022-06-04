@@ -1,5 +1,4 @@
 #include "include/entry_point.h"
-#include "./utils/include/ssl_utils.h"
 
 FILE *carrier_fptr, *in_fptr;
 steg_configuration_ptr steg_config;
@@ -49,7 +48,7 @@ int main(
     carrier_fptr = fopen(steg_config->bmp_carrier_path, "rw");
     if (carrier_fptr == NULL)
     {
-        log(ERROR, "%s\n", "Invalid carrier file path.");
+        logw(ERROR, "%s\n", "Invalid carrier file path.");
         exit_clean_up(STATUS_ERROR);
     }
     bmp_metadata = bitmap_read_metadata(carrier_fptr);
@@ -58,10 +57,15 @@ int main(
         exit_clean_up(STATUS_ERROR);
     }
 
+    for (int i = 0; i < bmp_metadata->info.header.height * bmp_metadata->info.header.width * 3; i += 3)
+    {
+        printf("R: %d G: %d B: %d\n", bmp_metadata->pixels[i], bmp_metadata->pixels[i + 1], bmp_metadata->pixels[i + 2]);
+    }
+
     in_fptr = fopen(steg_config->in_file_path, "rw");
     if (in_fptr == NULL)
     {
-        log(ERROR, "%s\n", "Invalid in file path.");
+        logw(ERROR, "%s\n", "Invalid in file path.");
         exit_clean_up(STATUS_ERROR);
     }
 
@@ -73,9 +77,10 @@ int main(
     }
 
     password_data p_data;
-    if (steg_config->enc_password != NULL){
+    if (steg_config->enc_password != NULL)
+    {
         p_data.password = steg_config->enc_password;
-        init_password_data(&p_data,steg_config->algo_mode,steg_config->block_mode);
+        init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode);
     }
 
     free(payload);
