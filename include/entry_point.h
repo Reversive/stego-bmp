@@ -5,5 +5,6 @@
 #include "../utils/include/file.h"
 #include <inttypes.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 #endif

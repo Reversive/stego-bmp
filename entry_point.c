@@ -3,47 +3,16 @@
 FILE *carrier_fptr, *in_fptr;
 steg_configuration_ptr steg_config;
 bitmap_metadata_ptr bmp_metadata;
-
-void exit_clean_up(int err_code)
-{
-    if (steg_config != NULL)
-    {
-        free(steg_config);
-        steg_config = NULL;
-    }
-    if (bmp_metadata != NULL)
-    {
-        free(bmp_metadata);
-        bmp_metadata = NULL;
-    }
-    if (carrier_fptr != NULL)
-    {
-        fclose(carrier_fptr);
-    }
-    if (in_fptr != NULL)
-    {
-        fclose(in_fptr);
-    }
-    exit(err_code);
-}
-
-char *generate_payload(const char *in_file_path, size_t *payload_size)
-{
-    uint32_t file_size = get_file_size(in_fptr);
-    const char *ext = get_filename_ext(in_file_path);
-    *payload_size = sizeof(uint32_t) + file_size + strlen(ext) + 1;
-    char *buff = calloc(*payload_size, sizeof(char));
-    uint32_t be_file_size = htonl(file_size);
-    memcpy(buff, &be_file_size, sizeof(uint32_t));
-    copy_file_content(in_fptr, buff + sizeof(uint32_t));
-    memcpy(buff + file_size + sizeof(uint32_t), ext, strlen(ext));
-    return buff;
-}
+static void sigterm_handler(const int signal);
+void exit_clean_up(int err_code);
+char *generate_payload(const char *in_file_path, size_t *payload_size);
 
 int main(
     int argc,
     char *argv[])
 {
+    signal(SIGTERM, sigterm_handler);
+    signal(SIGINT, sigterm_handler);
     steg_config = parse_options(argc, argv);
     carrier_fptr = fopen(steg_config->bmp_carrier_path, "rw");
     if (carrier_fptr == NULL)
@@ -85,4 +54,46 @@ int main(
 
     free(payload);
     exit_clean_up(STATUS_SUCCESS);
+}
+
+static void sigterm_handler(const int signal)
+{
+    logw(DEBUG, "signal %d, cleaning up and exiting\n", signal);
+    exit_clean_up(EXIT_SUCCESS);
+}
+
+void exit_clean_up(int err_code)
+{
+    if (steg_config != NULL)
+    {
+        free(steg_config);
+        steg_config = NULL;
+    }
+    if (bmp_metadata != NULL)
+    {
+        free(bmp_metadata);
+        bmp_metadata = NULL;
+    }
+    if (carrier_fptr != NULL)
+    {
+        fclose(carrier_fptr);
+    }
+    if (in_fptr != NULL)
+    {
+        fclose(in_fptr);
+    }
+    exit(err_code);
+}
+
+char *generate_payload(const char *in_file_path, size_t *payload_size)
+{
+    uint32_t file_size = get_file_size(in_fptr);
+    const char *ext = get_filename_ext(in_file_path);
+    *payload_size = sizeof(uint32_t) + file_size + strlen(ext) + 1;
+    char *buff = calloc(*payload_size, sizeof(char));
+    uint32_t be_file_size = htonl(file_size);
+    memcpy(buff, &be_file_size, sizeof(uint32_t));
+    copy_file_content(in_fptr, buff + sizeof(uint32_t));
+    memcpy(buff + file_size + sizeof(uint32_t), ext, strlen(ext));
+    return buff;
 }
