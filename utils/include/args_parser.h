@@ -31,19 +31,19 @@ typedef enum
 typedef enum
 {
     NO_ALGO = -1,
-    AES128,
-    AES192,
-    AES256,
-    DES
+    AES128 = 0,
+    AES192 = 1,
+    AES256 = 2,
+    DES = 3
 } ALGO_MODE;
 
 typedef enum
 {
     NO_BLOCK = -1,
-    ECB,
-    CFB,
-    OFB,
-    CBC
+    ECB = 0,
+    CFB = 1,
+    OFB = 2,
+    CBC = 3
 } BLOCK_MODE;
 
 typedef struct steg_configuration_t

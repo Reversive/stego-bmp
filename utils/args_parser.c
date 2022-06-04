@@ -154,22 +154,17 @@ steg_configuration_ptr parse_options(
         exit(-1);
     }
 
-    if ((steg_config->algo_mode != NO_ALGO || steg_config->block_mode != NO_BLOCK))
+    if ((steg_config->algo_mode != NO_ALGO || steg_config->block_mode != NO_BLOCK) && steg_config->enc_password == NULL)
     {
-        if (steg_config->enc_password == NULL)
-        {
-            printf("Attempting to encrypt requires -pass.\n");
-            free(steg_config);
-            exit(-1);
-        }
-        else
-        {
-            if (steg_config->algo_mode == NO_ALGO)
-                steg_config->algo_mode = parse_string_arg("AES128", algo_options, 4, NO_ALGO);
-            if (steg_config->block_mode == NO_BLOCK)
-                steg_config->block_mode = parse_string_arg("CBC", block_options, 4, NO_BLOCK);
-        }
+        printf("Attempting to encrypt requires -pass.\n");
+        free(steg_config);
+        exit(-1);
     }
+
+    if (steg_config->algo_mode == NO_ALGO)
+        steg_config->algo_mode = parse_string_arg("AES128", algo_options, 4, NO_ALGO);
+    if (steg_config->block_mode == NO_BLOCK)
+        steg_config->block_mode = parse_string_arg("CBC", block_options, 4, NO_BLOCK);
 
     return steg_config;
 }

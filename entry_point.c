@@ -1,4 +1,5 @@
 #include "include/entry_point.h"
+#include "./utils/include/ssl_utils.h"
 
 FILE *carrier_fptr, *in_fptr;
 steg_configuration_ptr steg_config;
@@ -70,6 +71,13 @@ int main(
     {
         printf("\\%02hhx", (unsigned char)payload[i]);
     }
+
+    password_data p_data;
+    if (steg_config->enc_password != NULL){
+        p_data.password = steg_config->enc_password;
+        init_password_data(&p_data,steg_config->algo_mode,steg_config->block_mode);
+    }
+
     free(payload);
     exit_clean_up(STATUS_SUCCESS);
 }
