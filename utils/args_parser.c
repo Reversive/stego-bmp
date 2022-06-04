@@ -50,21 +50,21 @@ static struct option long_opts[] =
 
 steg_configuration_ptr init_steg_config()
 {
-    steg_configuration_ptr steg_config = malloc(sizeof(steg_configuration));
-    if (steg_config == NULL)
+    steg_configuration_ptr config = malloc(sizeof(steg_configuration));
+    if (config == NULL)
     {
         logw(ERROR, "%s\n", "Insufficient memory to allocate POSIX arguments.");
         exit(-1);
     }
-    steg_config->action = NO_ACTION;
-    steg_config->in_file_path = NULL;
-    steg_config->bmp_carrier_path = NULL;
-    steg_config->bmp_out_path = NULL;
-    steg_config->steg_mode = NO_STEG;
-    steg_config->algo_mode = NO_ALGO;
-    steg_config->block_mode = NO_BLOCK;
-    steg_config->enc_password = NULL;
-    return steg_config;
+    config->action = NO_ACTION;
+    config->in_file_path = NULL;
+    config->bmp_carrier_path = NULL;
+    config->bmp_out_path = NULL;
+    config->steg_mode = NO_STEG;
+    config->algo_mode = NO_ALGO;
+    config->block_mode = NO_BLOCK;
+    config->enc_password = NULL;
+    return config;
 }
 
 int parse_string_arg(char *input, char **options, size_t size, int default_value)

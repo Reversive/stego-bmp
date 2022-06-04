@@ -20,7 +20,7 @@ uint32_t get_file_size(FILE *fp)
 
 void copy_file_content(FILE *fp, char *buff)
 {
-    char c;
+    int c;
     for (int i = 0; EOF != (c = fgetc(fp)); i++)
         buff[i] = c;
 }

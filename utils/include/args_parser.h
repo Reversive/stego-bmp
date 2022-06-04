@@ -60,8 +60,6 @@ typedef struct steg_configuration_t
 
 typedef steg_configuration *steg_configuration_ptr;
 
-extern steg_configuration_ptr steg_config;
-
 steg_configuration_ptr init_steg_config();
 steg_configuration_ptr parse_options(int argc, char *argv[]);
 

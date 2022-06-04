@@ -11,12 +11,6 @@ char *get_current_timestamp()
     return buffer;
 }
 
-void set_log_level(LOG_LEVEL newLevel)
-{
-    if (newLevel >= DEBUG && newLevel <= FATAL)
-        current_level = newLevel;
-}
-
 char *level_description(LOG_LEVEL level)
 {
     static char *description[] = {"DEBUG", "INFO", "ERROR", "FATAL"};
