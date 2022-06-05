@@ -19,6 +19,9 @@ typedef struct password_data
     cypher cypher;
 } password_data;
 
+int encrypt(password_data *password_data, unsigned char* plain_in, int plain_len, unsigned char * cypher_out);
+int decrypt(password_data *password_data, unsigned char* cypher_in, int cypher_len, unsigned char * plain_out);
 void init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_MODE block_mode);
+void clear_password_data(password_data *password_data);
 
 #endif

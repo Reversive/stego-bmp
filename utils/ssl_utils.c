@@ -4,7 +4,7 @@
 int KEY_SIZE[] = {16,24,32,8};
 int BLOCK_SIZE[] = {16,16,16,8};
 
-int encrypt(password_data *password_data, unsigned char* plain_in, unsigned char * cypher_out){
+int encrypt(password_data *password_data, unsigned char* plain_in, int plain_len, unsigned char * cypher_out){
     
     EVP_CIPHER_CTX *ctx;
     int len;
@@ -28,7 +28,7 @@ int encrypt(password_data *password_data, unsigned char* plain_in, unsigned char
      * Provide the message to be encrypted, and obtain the encrypted output.
      * EVP_EncryptUpdate can be called multiple times if necessary
      */
-    if(1 != EVP_EncryptUpdate(ctx, cypher_out, &len, plain_in, strlen((char *)plain_in)))
+    if(1 != EVP_EncryptUpdate(ctx, cypher_out, &len, plain_in, plain_len))
         printf("ERROR NO MANEJADO");
     ciphertext_len = len;
     /*
@@ -97,7 +97,6 @@ void init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK
 {
     password_data->cypher = cyphers[algo_mode][block_mode];
     init_password_data_arrs(password_data,algo_mode);
-    printf("ALGO: %d\n\n",algo_mode);
     EVP_BytesToKey(
         (password_data->cypher)(),
         EVP_sha256(),
@@ -108,38 +107,45 @@ void init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK
         password_data->key,
         password_data->iv);
 
+    return password_data;
 
-    /* Message to be encrypted */
-    unsigned char *plaintext =
-        (unsigned char *)"The quick brown fox jumps over the lazy dog";
+    // USE EXAMPLE:
+    // /* Message to be encrypted */
+    // unsigned char *plaintext =
+    //     (unsigned char *)"The quick brown fox jumps over the lazy dog";
 
-    /*
-     * Buffer for ciphertext. Ensure the buffer is long enough for the
-     * ciphertext which may be longer than the plaintext, depending on the
-     * algorithm and mode.
-     */
-    unsigned char ciphertext[128];
-    unsigned char decryptedtext[128];
-
-
-    /* Encrypt the plaintext */
-    int ciphertext_len = encrypt (password_data,plaintext,ciphertext);
-
-    /* Do something useful with the ciphertext here */
-    printf("Plaintext is: %s\n",plaintext);
-    printf("Ciphertext is:\n");
-    BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
-    printf("Size went from %ld to %d\n",strlen((char*)plaintext),ciphertext_len);
-
-      /* Decrypt the ciphertext */
-    int decryptedtext_len = decrypt(password_data, ciphertext, ciphertext_len, decryptedtext);
-
-    /* Add a NULL terminator. We are expecting printable text */
-    decryptedtext[decryptedtext_len] = '\0';
-
-    /* Show the decrypted text */
-    printf("Text after decrypting is:\n");
-    printf("%s\n", decryptedtext);
+    // /*
+    //  * Buffer for ciphertext. Ensure the buffer is long enough for the
+    //  * ciphertext which may be longer than the plaintext, depending on the
+    //  * algorithm and mode.
+    //  */
+    // unsigned char ciphertext[128];
+    // unsigned char decryptedtext[128];
 
 
+    // /* Encrypt the plaintext */
+    // int ciphertext_len = encrypt (password_data,plaintext,ciphertext);
+
+    // /* Do something useful with the ciphertext here */
+    // printf("Plaintext is: %s\n",plaintext);
+    // printf("Ciphertext is:\n");
+    // BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
+    // printf("Size went from %ld to %d\n",strlen((char*)plaintext),ciphertext_len);
+
+    //   /* Decrypt the ciphertext */
+    // int decryptedtext_len = decrypt(password_data, ciphertext, ciphertext_len, decryptedtext);
+
+    // /* Add a NULL terminator. We are expecting printable text */
+    // decryptedtext[decryptedtext_len] = '\0';
+
+    // /* Show the decrypted text */
+    // printf("Text after decrypting is:\n");
+    // printf("%s\n", decryptedtext);
+
+
+}
+
+void clear_password_data(password_data *password_data){
+    free(password_data->iv);
+    free(password_data->key);
 }
