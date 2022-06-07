@@ -95,7 +95,14 @@ steg_configuration_ptr parse_options(
         switch (option)
         {
         case 0:
-            // Flag cases, ignore.
+            if (embed_flag)
+            {
+                steg_config->action = EMBED;
+            }
+            else if (extract_flag)
+            {
+                steg_config->action = EXTRACT;
+            }
             break;
         case 'i':
             steg_config->in_file_path = optarg;
