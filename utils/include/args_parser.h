@@ -23,9 +23,9 @@ typedef enum
 typedef enum
 {
     NO_STEG = -1,
-    LSB1,
-    LSB4,
-    LSBI
+    LSB1 = 0,
+    LSB4 = 1,
+    LSBI = 2,
 } STEG_MODE;
 
 typedef enum
@@ -45,7 +45,6 @@ typedef enum
     OFB = 2,
     CBC = 3
 } BLOCK_MODE;
-
 
 typedef struct steg_configuration_t
 {
