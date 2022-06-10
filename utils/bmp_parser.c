@@ -1,5 +1,6 @@
 #include "include/bmp_parser.h"
 
+
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr)
 {
     bitmap_metadata *metadata = malloc(sizeof(bitmap_metadata));
@@ -113,4 +114,18 @@ unsigned char *bitmap_load_pixels(
     free(raw_data);
 
     return data;
+}
+
+int metadata_to_file(bitmap_metadata_ptr metadata, char* file_name){
+
+    fp = fopen(filename, "w");
+	if(fp == NULL) {
+		logw(ERROR, "%s\n", "Can't open file to insert metadata.");
+		return(-1);
+	}
+
+    //TODO: HELP MATO!!!
+
+    fclose(fp);
+
 }
