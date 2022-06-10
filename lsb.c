@@ -7,7 +7,7 @@ int can_store(STEG_MODE mode, bitmap_metadata_ptr metadata, size_t payload_size)
     return payload_size * 8 <= metadata->info.header.height * metadata->info.header.width * 3 * LSB_SIZES[mode];
 }
 
-int hide_payload(
+int hide_payload_into_meta(
     STEG_MODE mode,
     char *payload,
     bitmap_metadata_ptr metadata,

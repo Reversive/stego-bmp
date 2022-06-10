@@ -1,4 +1,5 @@
 #include "include/entry_point.h"
+#include "./include/lsb.h"
 
 FILE *carrier_fptr, *in_fptr;
 steg_configuration_ptr steg_config;
@@ -60,6 +61,9 @@ int main(
             printf("\\%02hhx", (unsigned char)payload[i]);
         }
         putc('\n', stdout);
+
+        logw(DEBUG, "Hiding payload into meta\n");
+        hide_payload_into_meta(steg_config->steg_mode,payload,bmp_metadata,payload_size);
 
         // Move this to EXTRACT later, this is just to test the decryption.
         printf("Payload post-decrypt:\n");
