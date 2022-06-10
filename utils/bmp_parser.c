@@ -1,6 +1,5 @@
 #include "include/bmp_parser.h"
 
-
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr)
 {
     bitmap_metadata *metadata = malloc(sizeof(bitmap_metadata));
@@ -94,7 +93,6 @@ unsigned char *bitmap_load_pixels(
     int row_padded = (core->width * 3 + 3) & (~3);
     unsigned char *raw_data = malloc(row_padded);
     unsigned char *data = malloc(3 * core->width * core->height);
-    unsigned char tmp;
 
     // Probably refactor this in the future
     for (int i = 0; i < core->height; i++)
@@ -103,9 +101,6 @@ unsigned char *bitmap_load_pixels(
         for (int j = 0; j < core->width * 3; j += 3)
         {
             int start = i * core->width * 3 + j;
-            tmp = raw_data[j];
-            raw_data[j] = raw_data[j + 2];
-            raw_data[j + 2] = tmp;
             data[start] = raw_data[j];
             data[start + 1] = raw_data[j + 1];
             data[start + 2] = raw_data[j + 2];
@@ -116,16 +111,30 @@ unsigned char *bitmap_load_pixels(
     return data;
 }
 
-int metadata_to_file(bitmap_metadata_ptr metadata, char* file_name){
-
-    fp = fopen(filename, "w");
-	if(fp == NULL) {
-		logw(ERROR, "%s\n", "Can't open file to insert metadata.");
-		return -1;
-	}
-
-    //TODO: HELP MATO!!!
-
+int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name)
+{
+    FILE *fp = fopen(file_name, "w");
+    if (fp == NULL)
+    {
+        logw(ERROR, "%s\n", "Can't create file to insert metadata.");
+        return -1;
+    }
+    if (fwrite(&metadata->header, sizeof(bitmap_header), 1, fp) != 1)
+    {
+        logw(ERROR, "%s\n", "Can't write header to file.");
+        return -1;
+    }
+    if (fwrite(&metadata->info, sizeof(bitmap_info), 1, fp) != 1)
+    {
+        logw(ERROR, "%s\n", "Can't write core to file.");
+        return -1;
+    }
+    size_t pixel_count = metadata->info.header.width * metadata->info.header.height;
+    if (fwrite(metadata->pixels, sizeof(rgb), pixel_count, fp) != pixel_count)
+    {
+        logw(ERROR, "%s\n", "Can't write pixels to file.");
+        return -1;
+    }
     fclose(fp);
     return 0;
 }

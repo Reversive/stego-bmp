@@ -28,11 +28,6 @@ int main(
         exit_clean_up(STATUS_ERROR);
     }
 
-    for (int i = 0; i < bmp_metadata->info.header.height * bmp_metadata->info.header.width * 3; i += 3)
-    {
-        // printf("R: %d G: %d B: %d\n", bmp_metadata->pixels[i], bmp_metadata->pixels[i + 1], bmp_metadata->pixels[i + 2]);
-    }
-
     in_fptr = fopen(steg_config->in_file_path, "rw");
     if (in_fptr == NULL)
     {
@@ -45,7 +40,8 @@ int main(
     if (should_encrypt)
     {
         p_data.password = steg_config->enc_password;
-        if (-1 == init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode)){
+        if (-1 == init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode))
+        {
             logw(ERROR, "%s\n", "Couldn't init password data.");
             exit_clean_up(STATUS_ERROR);
         }
@@ -62,10 +58,10 @@ int main(
         }
         putc('\n', stdout);
 
-        logw(DEBUG, "Hiding payload into meta\n");
-        hide_payload_into_meta(steg_config->steg_mode,payload,bmp_metadata,payload_size);
-        metadata_to_file(bmp_metadata, steg_config->out_file_path);
-        // Move this to EXTRACT later, this is just to test the decryption.
+        logw(DEBUG, "%s\n", "Hiding payload into meta");
+        hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size);
+        metadata_to_file(bmp_metadata, steg_config->bmp_out_path);
+        //  Move this to EXTRACT later, this is just to test the decryption.
         printf("Payload post-decrypt:\n");
         uint32_t enc_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
         char *dec_payload = malloc(enc_size);
@@ -161,6 +157,6 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
     *payload_size = bundle_size;
     free(raw_payload);
     free(encrypted_payload);
-    //BIO_dump_fp(stdout,bundled_payload,bundle_size+1);
+    // BIO_dump_fp(stdout,bundled_payload,bundle_size+1);
     return bundled_payload;
 }

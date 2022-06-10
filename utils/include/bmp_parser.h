@@ -68,4 +68,5 @@ typedef bitmap_metadata *bitmap_metadata_ptr;
 
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr);
 unsigned char *bitmap_load_pixels(FILE *fptr, uint64_t file_size, bitmap_header *header, bitmap_info *info);
+int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name);
 #endif
