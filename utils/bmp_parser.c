@@ -121,11 +121,11 @@ int metadata_to_file(bitmap_metadata_ptr metadata, char* file_name){
     fp = fopen(filename, "w");
 	if(fp == NULL) {
 		logw(ERROR, "%s\n", "Can't open file to insert metadata.");
-		return(-1);
+		return -1;
 	}
 
     //TODO: HELP MATO!!!
 
     fclose(fp);
-
+    return 0;
 }

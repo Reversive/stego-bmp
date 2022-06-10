@@ -64,7 +64,7 @@ int main(
 
         logw(DEBUG, "Hiding payload into meta\n");
         hide_payload_into_meta(steg_config->steg_mode,payload,bmp_metadata,payload_size);
-
+        metadata_to_file(bmp_metadata, steg_config->out_file_path);
         // Move this to EXTRACT later, this is just to test the decryption.
         printf("Payload post-decrypt:\n");
         uint32_t enc_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
