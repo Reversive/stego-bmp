@@ -29,7 +29,7 @@ int main(
 
     for (int i = 0; i < bmp_metadata->info.header.height * bmp_metadata->info.header.width * 3; i += 3)
     {
-        printf("R: %d G: %d B: %d\n", bmp_metadata->pixels[i], bmp_metadata->pixels[i + 1], bmp_metadata->pixels[i + 2]);
+        // printf("R: %d G: %d B: %d\n", bmp_metadata->pixels[i], bmp_metadata->pixels[i + 1], bmp_metadata->pixels[i + 2]);
     }
 
     in_fptr = fopen(steg_config->in_file_path, "rw");
@@ -44,7 +44,10 @@ int main(
     if (should_encrypt)
     {
         p_data.password = steg_config->enc_password;
-        init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode);
+        if (-1 == init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode)){
+            logw(ERROR, "%s\n", "Couldn't init password data.");
+            exit_clean_up(STATUS_ERROR);
+        }
     }
 
     if (steg_config->action == EMBED)
@@ -154,5 +157,6 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
     *payload_size = bundle_size;
     free(raw_payload);
     free(encrypted_payload);
+    //BIO_dump_fp(stdout,bundled_payload,bundle_size+1);
     return bundled_payload;
 }
