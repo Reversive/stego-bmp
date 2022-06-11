@@ -31,8 +31,7 @@ int hide_payload_into_meta(
             component_bit_idx = 0;
         }
 
-        payload_bit_idx++;
-        if (payload_bit_idx >= 8)
+        if (++payload_bit_idx >= 8)
         {
             payload_byte_idx++;
             payload_bit_idx = 0;
@@ -40,4 +39,61 @@ int hide_payload_into_meta(
     }
 
     return 0;
+}
+
+void get_size_from_meta(STEG_MODE mode, bitmap_metadata_ptr metadata, int size_arr[], int* start_component_idx){
+    int size_idx = 0, size_bit_idx = 0, component_idx = 0, component_bit_idx = 0;
+
+    while (size_idx < 4){
+        SET_BIT_TO(size_arr[size_idx], size_bit_idx, GET_BIT(metadata->pixels[component_idx], component_bit_idx));
+
+        if (++component_bit_idx >= LSB_SIZES[mode])
+        {
+            component_idx++;
+            component_bit_idx = 0;
+        }
+
+        if (++size_bit_idx >= 8)
+        {
+            size_idx++;
+            size_bit_idx = 0;
+        }
+    }
+
+    *start_component_idx = component_idx;
+
+}
+
+char* extract_payload_from_meta(STEG_MODE mode, bitmap_metadata_ptr metadata, int was_encrypted){
+    int payload_idx = 4, payload_bit_idx = 0,component_idx = 0,component_bit_idx = 0;
+    int size_arr[4] = {0};
+    get_size_from_meta(mode,metadata,size_arr, &component_idx);
+    int size = (size_arr[0] << 24) + (size_arr[1] << 16) + (size_arr[2] << 8) + size_arr[3];
+
+    printf("Extracted size:%d\n",size);
+    int extended_size = was_encrypted ? size: size+5;
+    int total_size = sizeof(uint32_t) + extended_size;
+    char * extracted_payload = malloc(total_size);
+    for (int i = 0; i < 4; i++){
+        extracted_payload[i] = (char)size_arr[i];
+    }
+
+    while (payload_idx < total_size){
+        SET_BIT_TO(extracted_payload[payload_idx], payload_bit_idx, GET_BIT(metadata->pixels[component_idx], component_bit_idx));
+
+        if (++component_bit_idx >= LSB_SIZES[mode])
+        {
+            component_idx++;
+            component_bit_idx = 0;
+        }
+
+        if (++payload_bit_idx >= 8)
+        {
+            payload_idx++;
+            payload_bit_idx = 0;
+        }
+    }
+
+    return extracted_payload;
+
 }

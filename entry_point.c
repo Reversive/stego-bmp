@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-FILE *carrier_fptr, *in_fptr;
+FILE *carrier_fptr;
 steg_configuration_ptr steg_config;
 bitmap_metadata_ptr bmp_metadata;
 static void sigterm_handler(const int signal);
@@ -28,13 +28,6 @@ int main(
     bmp_metadata = bitmap_read_metadata(carrier_fptr);
     if (bmp_metadata == NULL)
     {
-        exit_clean_up(STATUS_ERROR);
-    }
-
-    in_fptr = fopen(steg_config->in_file_path, "rw");
-    if (in_fptr == NULL)
-    {
-        logw(ERROR, "%s\n", "Invalid in file path.");
         exit_clean_up(STATUS_ERROR);
     }
 
@@ -65,15 +58,20 @@ int main(
         hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size);
         metadata_to_file(bmp_metadata, steg_config->bmp_out_path);
         //  Move this to EXTRACT later, this is just to test the decryption.
-        unload_payload(payload,&p_data,should_encrypt,"outtest.txt");
-        if (should_encrypt){
-            clear_password_data(&p_data);
-        }
+        //unload_payload(payload,&p_data,should_encrypt,"outtest.txt");
         free(payload);
 
     }
     else
     {
+        logw(DEBUG, "%s\n", "Extracting payload from meta");
+        char* extracted_payload= extract_payload_from_meta(steg_config->steg_mode, bmp_metadata,should_encrypt);
+        unload_payload(extracted_payload,&p_data,should_encrypt,"outtest.txt");
+        free(extracted_payload);
+    }
+
+    if (should_encrypt){
+        clear_password_data(&p_data);
     }
 
     exit_clean_up(STATUS_SUCCESS);
@@ -106,15 +104,18 @@ void exit_clean_up(int err_code)
     {
         fclose(carrier_fptr);
     }
-    if (in_fptr != NULL)
-    {
-        fclose(in_fptr);
-    }
-    exit(err_code);
 }
 
 char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
 {
+
+    FILE * in_fptr = fopen(steg_config->in_file_path, "rw");
+    if (in_fptr == NULL)
+    {
+        logw(ERROR, "%s\n", "Invalid in file path.");
+        exit_clean_up(STATUS_ERROR);
+    }
+
     uint32_t file_size = get_file_size(in_fptr);
     const char *ext = get_filename_ext(in_file_path);
     *raw_payload_size = sizeof(uint32_t) + file_size + strlen(ext) + 1;
@@ -128,7 +129,8 @@ char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
     // {
     //     printf("\\%02hhx", (unsigned char)payload[i]);
     // }
-    putc('\n', stdout);
+    // putc('\n', stdout);
+    fclose(in_fptr);
     return payload;
 }
 
