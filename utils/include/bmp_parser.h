@@ -66,7 +66,10 @@ typedef struct bitmap_metadata
 
 typedef bitmap_metadata *bitmap_metadata_ptr;
 
+// Reads bitmap from file into a metadata structure, for ease of use.
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr);
+// Loads body into bitmap_metaadata
 unsigned char *bitmap_load_pixels(FILE *fptr, uint64_t file_size, bitmap_header *header, bitmap_info *info);
+// Dumps bitmap_metadata into a given file
 int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name);
 #endif

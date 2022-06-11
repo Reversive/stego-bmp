@@ -28,6 +28,8 @@ int encrypt(password_data *password_data, unsigned char *plain_in, int plain_len
         return -1;
     }
     ciphertext_len = len;
+    logw(DEBUG,"LEN: %d",plain_len);
+
 
     if (1 != EVP_EncryptFinal_ex(ctx, cypher_out + len, &len)){
         logw(ERROR, "%s\n", "Couldn't encrypt padding.\n");
@@ -97,6 +99,10 @@ int init_password_data_arrs(password_data *password_data, ALGO_MODE algo_mode)
 
 int init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_MODE block_mode)
 {
+    if (password_data->password == NULL){
+        logw(ERROR, "%s\n", "Password should be preloaded.\n");
+        return -1;
+    }
     password_data->cypher = cyphers[algo_mode][block_mode];
     if (-1 == init_password_data_arrs(password_data, algo_mode)){
         logw(ERROR, "%s\n", "Couldn't init data for password.\n");

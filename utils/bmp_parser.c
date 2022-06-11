@@ -1,4 +1,5 @@
 #include "include/bmp_parser.h"
+#include "include/file.h"
 
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr)
 {
@@ -113,6 +114,10 @@ unsigned char *bitmap_load_pixels(
 
 int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name)
 {
+    if (strcmp(get_filename_ext(file_name),".bmp") != 0){
+        logw(ERROR, "File of extension %s is not a bmp file\n", get_filename_ext(file_name));
+        return -1;
+    }
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL)
     {
