@@ -10,10 +10,10 @@ int can_store(STEG_MODE mode, bitmap_metadata_ptr metadata, size_t payload_size)
 // Represents movin(g a bit pointer between a straigth char array and a bmp file at the same time
 void lsb_pointer_increment(STEG_MODE mode, int* bmp_byte_idx, int* bmp_bit_idx, int* arr_byte_idx, int* arr_bit_idx){
         
-        if (++(*bmp_bit_idx) >= LSB_SIZES[mode])
+        if (--(*bmp_bit_idx) < 0)
         {
             (*bmp_byte_idx)++;
-            *bmp_bit_idx = 0;
+            *bmp_bit_idx = LSB_SIZES[mode]-1;
         }
 
         if (++(*arr_bit_idx) >= 8)
@@ -35,7 +35,7 @@ int hide_payload_into_meta(
         return -1;
     }
 
-    int payload_byte_idx = 0, payload_bit_idx = 0, component_idx = 0, component_bit_idx = 0;
+    int payload_byte_idx = 0, payload_bit_idx = 0, component_idx = 0, component_bit_idx = LSB_SIZES[mode]-1;
     while ((size_t)payload_byte_idx < payload_size)
     {
         SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, GET_BIT(payload[payload_byte_idx], payload_bit_idx));
@@ -46,7 +46,7 @@ int hide_payload_into_meta(
 }
 
 void get_size_from_meta(STEG_MODE mode, bitmap_metadata_ptr metadata, int size_arr[], int* start_component_idx){
-    int size_idx = 0, size_bit_idx = 0, component_idx = 0, component_bit_idx = 0;
+    int size_idx = 0, size_bit_idx = 0, component_idx = 0, component_bit_idx = LSB_SIZES[mode]-1;
 
     while (size_idx < 4){
         SET_BIT_TO(size_arr[size_idx], size_bit_idx, GET_BIT(metadata->pixels[component_idx], component_bit_idx));
@@ -58,7 +58,7 @@ void get_size_from_meta(STEG_MODE mode, bitmap_metadata_ptr metadata, int size_a
 }
 
 unsigned char* extract_payload_from_meta(STEG_MODE mode, bitmap_metadata_ptr metadata, int was_encrypted){
-    int payload_idx = 4, payload_bit_idx = 0,component_idx = 0,component_bit_idx = 0;
+    int payload_idx = 4, payload_bit_idx = 0,component_idx = 0,component_bit_idx = LSB_SIZES[mode]-1;
     int size_arr[4] = {0};
     get_size_from_meta(mode,metadata,size_arr, &component_idx);
     int size = (size_arr[0] << 24) + (size_arr[1] << 16) + (size_arr[2] << 8) + size_arr[3];
@@ -75,6 +75,7 @@ unsigned char* extract_payload_from_meta(STEG_MODE mode, bitmap_metadata_ptr met
         SET_BIT_TO(extracted_payload[payload_idx], payload_bit_idx, GET_BIT(metadata->pixels[component_idx], component_bit_idx));
         lsb_pointer_increment(mode,&component_idx,&component_bit_idx,&payload_idx,&payload_bit_idx);
     }
+
     return extracted_payload;
 
 }
