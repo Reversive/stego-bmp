@@ -1,5 +1,7 @@
 #include "include/entry_point.h"
 #include "./include/lsb.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 FILE *carrier_fptr, *in_fptr;
 steg_configuration_ptr steg_config;
@@ -8,7 +10,7 @@ static void sigterm_handler(const int signal);
 void exit_clean_up(int err_code);
 char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size);
 char *generate_payload(const char *in_file_path, size_t *payload_size, password_data p_data, int should_encrypt);
-int unload_payload(char* payload, password_data* p_data, int should_encrypt);
+int unload_payload(char* payload, password_data* p_data, int should_encrypt, char* out_file_name);
 
 int main(
     int argc,
@@ -63,7 +65,7 @@ int main(
         hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size);
         metadata_to_file(bmp_metadata, steg_config->bmp_out_path);
         //  Move this to EXTRACT later, this is just to test the decryption.
-        unload_payload(payload,&p_data,should_encrypt);
+        unload_payload(payload,&p_data,should_encrypt,"outtest.txt");
         if (should_encrypt){
             clear_password_data(&p_data);
         }
@@ -155,7 +157,7 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
     return bundled_payload;
 }
 
-int unload_payload(char* payload, password_data* p_data, int should_encrypt){
+int unload_payload(char* payload, password_data* p_data, int should_encrypt, char* out_file_name){
 
     uint32_t payload_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
     char* final_payload = payload;
@@ -167,8 +169,14 @@ int unload_payload(char* payload, password_data* p_data, int should_encrypt){
         
 
     }
-    printf("FILE: %s\n\nEXTENSION:%s",final_payload+sizeof(uint32_t),final_payload+sizeof(uint32_t)+payload_size);
+    //TODO: CHECK OPEN FILE ERROR AND CHECK IF EXTENSIONS DONT MATCH
+    FILE* file = fopen(out_file_name,"w");
+    int results = fwrite(final_payload+sizeof(uint32_t),1,payload_size,file);
+    if (results < 0) {
+        logw(ERROR,"%s","Error writing in out file");
+    }
+    fclose(file);
     if (should_encrypt) free(final_payload);
-    return 0;
 
+    return 0;
 }
