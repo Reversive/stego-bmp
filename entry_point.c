@@ -8,6 +8,7 @@ static void sigterm_handler(const int signal);
 void exit_clean_up(int err_code);
 char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size);
 char *generate_payload(const char *in_file_path, size_t *payload_size, password_data p_data, int should_encrypt);
+int unload_payload(char* payload, password_data* p_data, int should_encrypt);
 
 int main(
     int argc,
@@ -62,19 +63,7 @@ int main(
         hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size);
         metadata_to_file(bmp_metadata, steg_config->bmp_out_path);
         //  Move this to EXTRACT later, this is just to test the decryption.
-        if (should_encrypt){
-            printf("Payload post-decrypt:\n");
-            uint32_t enc_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
-            char *dec_payload = malloc(enc_size);
-            size_t dec_payload_size = decrypt(&p_data, (unsigned char *)payload + 4, enc_size, (unsigned char *)dec_payload);
-            // for (size_t i = 0; i < dec_payload_size; i++)
-            // {
-            //     printf("\\%02hhx", (unsigned char)dec_payload[i]);
-            // }
-            putc('\n', stdout);
-            free(dec_payload);
-
-        }
+        unload_payload(payload,&p_data,should_encrypt);
         if (should_encrypt){
             clear_password_data(&p_data);
         }
@@ -164,4 +153,22 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
     free(encrypted_payload);
     // BIO_dump_fp(stdout,bundled_payload,bundle_size+1);
     return bundled_payload;
+}
+
+int unload_payload(char* payload, password_data* p_data, int should_encrypt){
+
+    uint32_t payload_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
+    char* final_payload = payload;
+    if (should_encrypt){
+        final_payload = malloc(payload_size);
+        size_t dec_payload_size = decrypt(p_data, (unsigned char *)payload + 4, payload_size, (unsigned char *)final_payload);
+        final_payload[dec_payload_size] = 0;
+        payload_size = (final_payload[0] << 24) + (final_payload[1] << 16) + (final_payload[2] << 8) + final_payload[3];
+        
+
+    }
+    printf("FILE: %s\n\nEXTENSION:%s",final_payload+sizeof(uint32_t),final_payload+sizeof(uint32_t)+payload_size);
+    if (should_encrypt) free(final_payload);
+    return 0;
+
 }
