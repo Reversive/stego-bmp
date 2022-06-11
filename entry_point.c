@@ -39,7 +39,7 @@ int main(
     int should_encrypt = steg_config->enc_password != NULL;
     if (should_encrypt)
     {
-        p_data.password = steg_config->enc_password;
+        p_data.password = steg_config->enc_password;    
         if (-1 == init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode))
         {
             logw(ERROR, "%s\n", "Couldn't init password data.");
@@ -51,30 +51,35 @@ int main(
     {
         size_t payload_size;
         char *payload = generate_payload(steg_config->in_file_path, &payload_size, p_data, should_encrypt);
-        printf("Payload post-encrypt:\n");
-        for (size_t i = 0; i < payload_size; i++)
-        {
-            printf("\\%02hhx", (unsigned char)payload[i]);
-        }
+        // printf("Payload post-encrypt:\n");
+        // for (size_t i = 0; i < payload_size; i++)
+        // {
+        //     printf("\\%02hhx", (unsigned char)payload[i]);
+        // }
         putc('\n', stdout);
 
         logw(DEBUG, "%s\n", "Hiding payload into meta");
         hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size);
         metadata_to_file(bmp_metadata, steg_config->bmp_out_path);
         //  Move this to EXTRACT later, this is just to test the decryption.
-        printf("Payload post-decrypt:\n");
-        uint32_t enc_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
-        char *dec_payload = malloc(enc_size);
-        size_t dec_payload_size = decrypt(&p_data, (unsigned char *)payload + 4, enc_size, (unsigned char *)dec_payload);
-        for (size_t i = 0; i < dec_payload_size; i++)
-        {
-            printf("\\%02hhx", (unsigned char)dec_payload[i]);
-        }
-        putc('\n', stdout);
+        if (should_encrypt){
+            printf("Payload post-decrypt:\n");
+            uint32_t enc_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
+            char *dec_payload = malloc(enc_size);
+            size_t dec_payload_size = decrypt(&p_data, (unsigned char *)payload + 4, enc_size, (unsigned char *)dec_payload);
+            // for (size_t i = 0; i < dec_payload_size; i++)
+            // {
+            //     printf("\\%02hhx", (unsigned char)dec_payload[i]);
+            // }
+            putc('\n', stdout);
+            free(dec_payload);
 
-        clear_password_data(&p_data);
+        }
+        if (should_encrypt){
+            clear_password_data(&p_data);
+        }
         free(payload);
-        free(dec_payload);
+
     }
     else
     {
@@ -127,11 +132,11 @@ char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
     memcpy(payload, &be_file_size, sizeof(uint32_t));
     copy_file_content(in_fptr, payload + sizeof(uint32_t));
     memcpy(payload + file_size + sizeof(uint32_t), ext, strlen(ext));
-    printf("Payload pre-encrypt:\n");
-    for (size_t i = 0; i < *raw_payload_size; i++)
-    {
-        printf("\\%02hhx", (unsigned char)payload[i]);
-    }
+    // printf("Payload pre-encrypt:\n");
+    // for (size_t i = 0; i < *raw_payload_size; i++)
+    // {
+    //     printf("\\%02hhx", (unsigned char)payload[i]);
+    // }
     putc('\n', stdout);
     return payload;
 }

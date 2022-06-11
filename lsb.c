@@ -16,8 +16,8 @@ int hide_payload_into_meta(
 {
     if (!can_store(mode, metadata, payload_size))
     {
-        printf("Implementa el Log flaco");
-        return (-1);
+        logw(ERROR,"BMP file not big enough to store, bits in payload: %ld // bits available: %ld",payload_size * 8,(size_t)metadata->info.header.height * metadata->info.header.width * 3 * LSB_SIZES[mode])
+        exit(-1);
     }
 
     int payload_byte_idx = 0, payload_bit_idx = 0, component_idx = 0, component_bit_idx = 0;

@@ -118,6 +118,12 @@ int init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_
 
 void clear_password_data(password_data *password_data)
 {
-    free(password_data->iv);
-    free(password_data->key);
+
+    if (password_data->iv)
+        free(password_data->iv);
+    if (password_data->key)
+        free(password_data->key);
+
+
+        
 }
