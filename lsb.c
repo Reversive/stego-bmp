@@ -1,8 +1,6 @@
 #include "./include/lsb.h"
 
-// SHOULD BE THIS
-//static int LSB_SIZES[3] = {1, 4, 0};
-static int LSB_SIZES[3] = {7, 8, 0};
+static int LSB_SIZES[3] = {1, 4, 0};
 
 int can_store(STEG_MODE mode, bitmap_metadata_ptr metadata, size_t payload_size)
 {
@@ -40,9 +38,7 @@ int hide_payload_into_meta(
     int payload_byte_idx = 0, payload_bit_idx = 0, component_idx = 0, component_bit_idx = LSB_SIZES[mode]-1;
     while ((size_t)payload_byte_idx < payload_size)
     {
-        // SHOULD BE THIS
-        //SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, GET_BIT(payload[payload_byte_idx], payload_bit_idx));
-        SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, 0);
+        SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, GET_BIT(payload[payload_byte_idx], (7-payload_bit_idx)));
         lsb_pointer_increment(mode,&component_idx,&component_bit_idx,&payload_byte_idx,&payload_bit_idx);
     }
 
@@ -53,7 +49,7 @@ void get_size_from_meta(STEG_MODE mode, bitmap_metadata_ptr metadata, int size_a
     int size_idx = 0, size_bit_idx = 0, component_idx = 0, component_bit_idx = LSB_SIZES[mode]-1;
 
     while (size_idx < 4){
-        SET_BIT_TO(size_arr[size_idx], size_bit_idx, GET_BIT(metadata->pixels[component_idx], component_bit_idx));
+        SET_BIT_TO(size_arr[size_idx], (7-size_bit_idx), GET_BIT(metadata->pixels[component_idx], component_bit_idx));
         lsb_pointer_increment(mode,&component_idx,&component_bit_idx,&size_idx,&size_bit_idx);
     }
 
@@ -76,7 +72,7 @@ unsigned char* extract_payload_from_meta(STEG_MODE mode, bitmap_metadata_ptr met
     }
 
     while (payload_idx < total_size){
-        SET_BIT_TO(extracted_payload[payload_idx], payload_bit_idx, GET_BIT(metadata->pixels[component_idx], component_bit_idx));
+        SET_BIT_TO(extracted_payload[payload_idx], (7-payload_bit_idx), GET_BIT(metadata->pixels[component_idx], component_bit_idx));
         lsb_pointer_increment(mode,&component_idx,&component_bit_idx,&payload_idx,&payload_bit_idx);
     }
 
