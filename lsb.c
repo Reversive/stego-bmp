@@ -2,7 +2,7 @@
 
 // SHOULD BE THIS
 //static int LSB_SIZES[3] = {1, 4, 0};
-static int LSB_SIZES[3] = {8, 8, 0};
+static int LSB_SIZES[3] = {7, 8, 0};
 
 int can_store(STEG_MODE mode, bitmap_metadata_ptr metadata, size_t payload_size)
 {
@@ -42,7 +42,7 @@ int hide_payload_into_meta(
     {
         // SHOULD BE THIS
         //SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, GET_BIT(payload[payload_byte_idx], payload_bit_idx));
-        SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, 0));
+        SET_BIT_TO(metadata->pixels[component_idx], component_bit_idx, 0);
         lsb_pointer_increment(mode,&component_idx,&component_bit_idx,&payload_byte_idx,&payload_bit_idx);
     }
 
