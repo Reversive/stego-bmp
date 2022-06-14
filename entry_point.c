@@ -61,7 +61,6 @@ int main(
     {
         size_t payload_size;
         payload = generate_payload(steg_config->in_file_path, &payload_size, p_data, should_encrypt);
-
         logw(DEBUG, "%s\n", "Hiding payload into meta");
         if (-1 == hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size)){
             logw(ERROR,"%s","Error hiding payload");
