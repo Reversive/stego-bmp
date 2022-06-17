@@ -114,7 +114,8 @@ unsigned char *bitmap_load_pixels(
 
 int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name)
 {
-    if (strcmp(get_filename_ext(file_name),".bmp") != 0){
+    if (strcmp(get_filename_ext(file_name), ".bmp") != 0)
+    {
         logw(ERROR, "File of extension %s is not a bmp file\n", get_filename_ext(file_name));
         return -1;
     }
@@ -127,17 +128,20 @@ int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name)
     if (fwrite(&metadata->header, sizeof(bitmap_header), 1, fp) != 1)
     {
         logw(ERROR, "%s\n", "Can't write header to file.");
+        fclose(fp);
         return -1;
     }
     if (fwrite(&metadata->info, sizeof(bitmap_info), 1, fp) != 1)
     {
         logw(ERROR, "%s\n", "Can't write core to file.");
+        fclose(fp);
         return -1;
     }
     size_t pixel_count = metadata->info.header.width * metadata->info.header.height;
     if (fwrite(metadata->pixels, sizeof(rgb), pixel_count, fp) != pixel_count)
     {
         logw(ERROR, "%s\n", "Can't write pixels to file.");
+        fclose(fp);
         return -1;
     }
     fclose(fp);

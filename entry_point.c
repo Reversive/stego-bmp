@@ -14,7 +14,7 @@ char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size);
 // Generates payload from file with (if necessary) encryption
 char *generate_payload(const char *in_file_path, size_t *payload_size, password_data p_data, int should_encrypt);
 // Dumps pre-generated payload into file
-int unload_payload(unsigned char* payload, password_data* p_data, int should_encrypt, char* out_file_name);
+int unload_payload(unsigned char *payload, password_data *p_data, int should_encrypt, char *out_file_name);
 
 int main(
     int argc,
@@ -42,13 +42,13 @@ int main(
         exit_clean_up(STATUS_ERROR);
     }
 
-    password_data p_data;
+    password_data p_data = NULL;
     int should_encrypt = steg_config->enc_password != NULL;
 
     // Init encryption data
     if (should_encrypt)
     {
-        p_data.password = steg_config->enc_password;    
+        p_data.password = steg_config->enc_password;
         if (-1 == init_password_data(&p_data, steg_config->algo_mode, steg_config->block_mode))
         {
             logw(ERROR, "%s\n", "Couldn't init password data.");
@@ -56,36 +56,40 @@ int main(
         }
     }
 
-    char * payload;
+    char *payload;
     if (steg_config->action == EMBED)
     {
         size_t payload_size;
-        payload = generate_payload(steg_config->in_file_path, &payload_size, p_data, should_encrypt);
+        payload = generate_payload(steg_config->in_file_path, &payload_size, should_encrypt ? p_data : NULL, should_encrypt);
         logw(DEBUG, "%s\n", "Hiding payload into meta");
-        if (-1 == hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size)){
-            logw(ERROR,"%s","Error hiding payload");
+        if (-1 == hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size))
+        {
+            logw(ERROR, "%s", "Error hiding payload");
             exit_clean_up(STATUS_ERROR);
         }
-        if (-1 == metadata_to_file(bmp_metadata, steg_config->bmp_out_path)){
-            logw(ERROR,"Error dumping meta in file %s",steg_config->bmp_out_path);
+        if (-1 == metadata_to_file(bmp_metadata, steg_config->bmp_out_path))
+        {
+            logw(ERROR, "Error dumping meta in file %s", steg_config->bmp_out_path);
             exit_clean_up(STATUS_ERROR);
         }
-
     }
     else
     {
-        unsigned char* extracted_payload;
+        unsigned char *extracted_payload;
         logw(DEBUG, "%s\n", "Extracting payload from meta");
-        extracted_payload = extract_payload_from_meta(steg_config->steg_mode, bmp_metadata,should_encrypt);
-        if (-1 == unload_payload(extracted_payload,&p_data,should_encrypt,steg_config->bmp_out_path)){
-            logw(ERROR,"Error unloading payload in %s",steg_config->bmp_out_path);
+        extracted_payload = extract_payload_from_meta(steg_config->steg_mode, bmp_metadata, should_encrypt);
+        if (-1 == unload_payload(extracted_payload, &p_data, should_encrypt, steg_config->bmp_out_path))
+        {
+            logw(ERROR, "Error unloading payload in %s", steg_config->bmp_out_path);
             exit_clean_up(STATUS_ERROR);
         }
         free(extracted_payload);
     }
 
-    if (payload) free(payload);
-    if (should_encrypt) clear_password_data(&p_data);
+    if (payload)
+        free(payload);
+    if (should_encrypt)
+        clear_password_data(&p_data);
     exit_clean_up(STATUS_SUCCESS);
 }
 
@@ -121,7 +125,7 @@ void exit_clean_up(int err_code)
 char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
 {
 
-    FILE * in_fptr = fopen(steg_config->in_file_path, "rw");
+    FILE *in_fptr = fopen(steg_config->in_file_path, "rw");
     if (in_fptr == NULL)
     {
         logw(ERROR, "%s\n", "Invalid in file path.");
@@ -164,31 +168,35 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
     return bundled_payload;
 }
 
-int unload_payload(unsigned char* payload, password_data* p_data, int should_encrypt, char* out_file_name){
+int unload_payload(unsigned char *payload, password_data *p_data, int should_encrypt, char *out_file_name)
+{
 
     uint32_t payload_size = (payload[0] << 24) + (payload[1] << 16) + (payload[2] << 8) + payload[3];
-    unsigned char * final_payload = payload;
-    if (should_encrypt){
+    unsigned char *final_payload = payload;
+    if (should_encrypt)
+    {
         final_payload = malloc(payload_size);
         size_t dec_payload_size = decrypt(p_data, (unsigned char *)payload + 4, payload_size, (unsigned char *)final_payload);
         final_payload[dec_payload_size] = 0;
         payload_size = (final_payload[0] << 24) + (final_payload[1] << 16) + (final_payload[2] << 8) + final_payload[3];
-        
     }
 
-    char* found_ext = (char*)final_payload+sizeof(uint32_t)+payload_size;
-    if (strcmp(found_ext, get_filename_ext(out_file_name)) != 0){
-        logw(ERROR,"Found extension: %s doesnt match %s extension\n",final_payload+sizeof(uint32_t)+payload_size, out_file_name);
+    char *found_ext = (char *)final_payload + sizeof(uint32_t) + payload_size;
+    if (strcmp(found_ext, get_filename_ext(out_file_name)) != 0)
+    {
+        logw(ERROR, "Found extension: %s doesnt match %s extension\n", final_payload + sizeof(uint32_t) + payload_size, out_file_name);
         return -1;
     }
-    //TODO: CHECK OPEN FILE ERROR AND CHECK IF EXTENSIONS DONT MATCH (SEGFAULT AFTER HERE)
-    FILE* file = fopen(out_file_name,"w");
-    int results = fwrite(final_payload+sizeof(uint32_t),1,payload_size,file);
-    if (results < 0) {
-        logw(DEBUG,"%s","Error writing in out file");
+    // TODO: CHECK OPEN FILE ERROR AND CHECK IF EXTENSIONS DONT MATCH (SEGFAULT AFTER HERE)
+    FILE *file = fopen(out_file_name, "w");
+    int results = fwrite(final_payload + sizeof(uint32_t), 1, payload_size, file);
+    if (results < 0)
+    {
+        logw(DEBUG, "%s", "Error writing in out file");
     }
     fclose(file);
-    if (should_encrypt) free(final_payload);
+    if (should_encrypt)
+        free(final_payload);
 
     return 0;
 }
