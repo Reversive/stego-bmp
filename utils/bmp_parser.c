@@ -107,7 +107,7 @@ unsigned char *bitmap_load_pixels(
         free(raw_data);
         return NULL;
     }
-    // Probably refactor this in the future
+
     for (int i = 0; i < core->height; i++)
     {
         fread(raw_data, sizeof(unsigned char), row_padded, fptr);

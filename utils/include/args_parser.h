@@ -60,7 +60,24 @@ typedef struct steg_configuration_t
 
 typedef steg_configuration *steg_configuration_ptr;
 
+/*
+ * Function: init_steg_config
+ * ----------------------------
+ *   Allocates space for the steg_configuration structure.
+ *
+ *   returns: steg_configuration_ptr allocated structure.
+ */
 steg_configuration_ptr init_steg_config();
+
+/*
+ * Function: parse_options
+ * ----------------------------
+ *   Parses the command line arguments and fills the steg_configuration structure.
+ *   argc: number of arguments.
+ *   argv: array of arguments.
+ *
+ *  returns: steg_configuration_ptr allocated structure.
+ */
 steg_configuration_ptr parse_options(int argc, char *argv[]);
 
 #endif

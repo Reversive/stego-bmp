@@ -66,10 +66,40 @@ typedef struct bitmap_metadata
 
 typedef bitmap_metadata *bitmap_metadata_ptr;
 
-// Reads bitmap from file into a metadata structure, for ease of use.
+/*
+ * Function: bitmap_read_metadata
+ * ----------------------------
+ *   Reads bitmap from file into a metadata structure, for ease of use.
+ *
+ *   fptr: file pointer to bitmap file.
+ *
+ *   returns: structure holding metadata about the bitmap.
+ */
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr);
-// Loads body into bitmap_metaadata
+
+/*
+ * Function: bitmap_load_pixels
+ * ----------------------------
+ *   Loads bitmap pixels into a char pointer. The bitmap pixels are stored in BGR format.
+ *
+ *   fptr: file pointer to bitmap file.
+ *   file_size: size of the file.
+ *   header: pointer to the bitmap header structure.
+ *   info: pointer to the bitmap info structure.
+ *
+ *   returns: steg_configuration_ptr allocated structure.
+ */
 unsigned char *bitmap_load_pixels(FILE *fptr, uint64_t file_size, bitmap_header *header, bitmap_info *info);
-// Dumps bitmap_metadata into a given file
+
+/*
+ * Function: metadata_to_file
+ * ----------------------------
+ *   Dumps bitmap metadata into a given file.
+ *
+ *   metadata: pointer to the bitmap metadata structure.
+ *   file_name: path to the file to write to.
+ *   returns: 0 on success, -1 on failure.
+ */
 int metadata_to_file(bitmap_metadata_ptr metadata, char *file_name);
+
 #endif

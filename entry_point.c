@@ -9,22 +9,20 @@ FILE *carrier_fptr;
 steg_configuration_ptr steg_config;
 bitmap_metadata_ptr bmp_metadata;
 
-static void sigterm_handler(const int signal);
-void exit_clean_up(int err_code);
-// Generates payload from file without encryption
-char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size);
-// Generates payload from file with (if necessary) encryption
-char *generate_payload(const char *in_file_path, size_t *payload_size, password_data p_data, int should_encrypt);
-// Dumps pre-generated payload into file
-int unload_payload(unsigned char *payload, password_data *p_data, int should_encrypt, char *out_file_name);
+/*
+ * Function: sig_handler
+ * ----------------------------
+ *   Handler for SIGTERM & SIGINT signals.
+ *   signal: signal number.
+ */
+static void sig_handler(const int signal);
 
 int main(
     int argc,
     char *argv[])
 {
-    // Signal config
-    signal(SIGTERM, sigterm_handler);
-    signal(SIGINT, sigterm_handler);
+    signal(SIGTERM, sig_handler);
+    signal(SIGINT, sig_handler);
 
     steg_config = parse_options(argc, argv);
 
@@ -95,7 +93,7 @@ int main(
     exit_clean_up(STATUS_SUCCESS);
 }
 
-static void sigterm_handler(const int signal)
+static void sig_handler(const int signal)
 {
     logw(DEBUG, "signal %d, cleaning up and exiting\n", signal);
     exit_clean_up(EXIT_SUCCESS);
@@ -149,7 +147,6 @@ char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
     memcpy(payload, &be_file_size, sizeof(uint32_t));
     copy_file_content(in_fptr, payload + sizeof(uint32_t));
     strcpy(payload + file_size + sizeof(uint32_t), ext);
-    // memcpy(payload + file_size + sizeof(uint32_t), ext, strlen(ext));
     fclose(in_fptr);
     return payload;
 }
@@ -163,7 +160,6 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
         *payload_size = raw_payload_size;
         return raw_payload;
     }
-    // Move what is below this to a separate function later.
     char *encrypted_payload = malloc(raw_payload_size + 16);
     if (encrypted_payload == NULL)
     {
@@ -215,7 +211,6 @@ int unload_payload(unsigned char *payload, password_data *p_data, int should_enc
         logw(ERROR, "Found extension: %s doesnt match %s extension\n", final_payload + sizeof(uint32_t) + payload_size, out_file_name);
         return -1;
     }
-    // TODO: CHECK OPEN FILE ERROR AND CHECK IF EXTENSIONS DONT MATCH (SEGFAULT AFTER HERE)
     FILE *file = fopen(out_file_name, "w");
     if (file == NULL)
     {
