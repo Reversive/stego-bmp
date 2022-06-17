@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/entry_point.h"
 #include "./include/lsb.h"
 #include <stdio.h>
@@ -42,7 +44,7 @@ int main(
         exit_clean_up(STATUS_ERROR);
     }
 
-    password_data p_data = NULL;
+    password_data p_data = {0};
     int should_encrypt = steg_config->enc_password != NULL;
 
     // Init encryption data
@@ -56,11 +58,11 @@ int main(
         }
     }
 
-    char *payload;
+    char *payload = NULL;
     if (steg_config->action == EMBED)
     {
         size_t payload_size;
-        payload = generate_payload(steg_config->in_file_path, &payload_size, should_encrypt ? p_data : NULL, should_encrypt);
+        payload = generate_payload(steg_config->in_file_path, &payload_size, p_data, should_encrypt);
         logw(DEBUG, "%s\n", "Hiding payload into meta");
         if (-1 == hide_payload_into_meta(steg_config->steg_mode, payload, bmp_metadata, payload_size))
         {
@@ -120,6 +122,7 @@ void exit_clean_up(int err_code)
     {
         fclose(carrier_fptr);
     }
+    exit(err_code);
 }
 
 char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
@@ -134,12 +137,19 @@ char *generate_raw_payload(const char *in_file_path, size_t *raw_payload_size)
 
     uint32_t file_size = get_file_size(in_fptr);
     const char *ext = get_filename_ext(in_file_path);
+    printf("%s\n", ext);
     *raw_payload_size = sizeof(uint32_t) + file_size + strlen(ext) + 1;
     char *payload = calloc(*raw_payload_size, sizeof(char));
+    if (payload == NULL)
+    {
+        logw(ERROR, "%s\n", "Couldn't allocate memory for payload.");
+        exit_clean_up(STATUS_ERROR);
+    }
     uint32_t be_file_size = htonl(file_size);
     memcpy(payload, &be_file_size, sizeof(uint32_t));
     copy_file_content(in_fptr, payload + sizeof(uint32_t));
-    memcpy(payload + file_size + sizeof(uint32_t), ext, strlen(ext));
+    strcpy(payload + file_size + sizeof(uint32_t), ext);
+    // memcpy(payload + file_size + sizeof(uint32_t), ext, strlen(ext));
     fclose(in_fptr);
     return payload;
 }
@@ -155,9 +165,22 @@ char *generate_payload(const char *in_file_path, size_t *payload_size, password_
     }
     // Move what is below this to a separate function later.
     char *encrypted_payload = malloc(raw_payload_size + 16);
+    if (encrypted_payload == NULL)
+    {
+        free(raw_payload);
+        logw(ERROR, "%s\n", "Couldn't allocate memory for encrypted payload.");
+        exit_clean_up(STATUS_ERROR);
+    }
     size_t encrypted_payload_size = encrypt(&p_data, (unsigned char *)raw_payload, raw_payload_size, (unsigned char *)encrypted_payload);
     size_t bundle_size = sizeof(uint32_t) + encrypted_payload_size;
     char *bundled_payload = malloc(bundle_size + 1);
+    if (bundled_payload == NULL)
+    {
+        free(encrypted_payload);
+        free(raw_payload);
+        logw(ERROR, "%s\n", "Couldn't allocate memory for bundled payload.");
+        exit_clean_up(STATUS_ERROR);
+    }
     uint32_t be_encrypted_payload_size = htonl(encrypted_payload_size);
     memcpy(bundled_payload, &be_encrypted_payload_size, sizeof(uint32_t));
     memcpy(bundled_payload + sizeof(uint32_t), encrypted_payload, encrypted_payload_size);
@@ -176,6 +199,11 @@ int unload_payload(unsigned char *payload, password_data *p_data, int should_enc
     if (should_encrypt)
     {
         final_payload = malloc(payload_size);
+        if (final_payload == NULL)
+        {
+            logw(ERROR, "%s\n", "Couldn't allocate memory for final payload.");
+            exit_clean_up(STATUS_ERROR);
+        }
         size_t dec_payload_size = decrypt(p_data, (unsigned char *)payload + 4, payload_size, (unsigned char *)final_payload);
         final_payload[dec_payload_size] = 0;
         payload_size = (final_payload[0] << 24) + (final_payload[1] << 16) + (final_payload[2] << 8) + final_payload[3];
@@ -189,6 +217,11 @@ int unload_payload(unsigned char *payload, password_data *p_data, int should_enc
     }
     // TODO: CHECK OPEN FILE ERROR AND CHECK IF EXTENSIONS DONT MATCH (SEGFAULT AFTER HERE)
     FILE *file = fopen(out_file_name, "w");
+    if (file == NULL)
+    {
+        logw(ERROR, "Couldn't open file %s\n", out_file_name);
+        return -1;
+    }
     int results = fwrite(final_payload + sizeof(uint32_t), 1, payload_size, file);
     if (results < 0)
     {

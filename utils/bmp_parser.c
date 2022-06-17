@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/bmp_parser.h"
 #include "include/file.h"
 
@@ -93,8 +95,18 @@ unsigned char *bitmap_load_pixels(
 
     int row_padded = (core->width * 3 + 3) & (~3);
     unsigned char *raw_data = malloc(row_padded);
+    if (raw_data == NULL)
+    {
+        logw(ERROR, "%s\n", "Insufficient memory to allocate raw data.");
+        return NULL;
+    }
     unsigned char *data = malloc(3 * core->width * core->height);
-
+    if (data == NULL)
+    {
+        logw(ERROR, "%s\n", "Insufficient memory to allocate data.");
+        free(raw_data);
+        return NULL;
+    }
     // Probably refactor this in the future
     for (int i = 0; i < core->height; i++)
     {

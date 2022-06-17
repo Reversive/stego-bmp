@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "./include/lsb.h"
 
 static int LSB_SIZES[3] = {1, 4, 1};
@@ -80,6 +82,11 @@ unsigned char *extract_payload_from_meta(STEG_MODE mode, bitmap_metadata_ptr met
     int extended_size = was_encrypted ? size : size + 5;
     int total_size = sizeof(uint32_t) + extended_size;
     unsigned char *extracted_payload = malloc(total_size);
+    if (extracted_payload == NULL)
+    {
+        logw(ERROR, "%s\n.", "Could not allocate memory for extracted payload");
+        return NULL;
+    }
     for (int i = 0; i < 4; i++)
     {
         extracted_payload[i] = (unsigned char)size_arr[i];
@@ -187,7 +194,11 @@ unsigned char *extract_payload_from_meta_improved(bitmap_metadata_ptr metadata, 
     int extended_size = was_encrypted ? size : size + 5;
     int total_size = sizeof(uint32_t) + extended_size;
     unsigned char *extracted_payload = malloc(total_size);
-
+    if (extracted_payload == NULL)
+    {
+        logw(ERROR, "%s\n.", "Could not allocate memory for extracted payload");
+        return NULL;
+    }
     for (int i = 0; i < 4; i++)
     {
         extracted_payload[i] = (unsigned char)size_arr[i];
