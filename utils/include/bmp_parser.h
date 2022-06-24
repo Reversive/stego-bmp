@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "logger.h"
 #include <math.h>
+#include "file.h"
 
 #pragma pack(push, 1)
 

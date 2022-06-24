@@ -1,7 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "./include/ssl_utils.h"
-#include "./include/logger.h"
 
 int KEY_SIZE[] = {16, 24, 32, 8};
 int BLOCK_SIZE[] = {16, 16, 16, 8};

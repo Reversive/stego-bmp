@@ -3,7 +3,8 @@
 #include "lsb.h"
 #include "payload.h"
 #include <signal.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 /*
  * Function: exit_clean_up
  * ----------------------------
@@ -15,5 +16,11 @@
  *   bmp_metadata: bitmap metadata.
  */
 void exit_clean_up(int err_code, FILE *carrier_fptr, steg_configuration_ptr steg_config, bitmap_metadata_ptr bmp_metadata);
+
+enum
+{
+    STATUS_ERROR = -1,
+    STATUS_SUCCESS
+} ERROR_CODES;
 
 #endif

@@ -1,7 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/bmp_parser.h"
-#include "include/file.h"
 
 bitmap_metadata_ptr bitmap_read_metadata(FILE *fptr)
 {

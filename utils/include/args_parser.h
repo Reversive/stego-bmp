@@ -7,12 +7,6 @@
 #include "logger.h"
 #include <getopt.h>
 
-enum
-{
-    STATUS_ERROR = -1,
-    STATUS_SUCCESS
-} ERROR_CODES;
-
 typedef enum
 {
     NO_ACTION = -1,

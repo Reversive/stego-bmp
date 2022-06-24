@@ -3,6 +3,7 @@
 #include "./args_parser.h"
 #include <string.h>
 #include <openssl/evp.h>
+#include "logger.h"
 
 typedef const EVP_CIPHER *(*cypher)(void);
 
@@ -14,8 +15,8 @@ static const cypher cyphers[4][4] = {{EVP_aes_128_ecb, EVP_aes_128_cfb, EVP_aes_
 typedef struct password_data
 {
     char *password;
-    unsigned char* key;
-    unsigned char* iv;
+    unsigned char *key;
+    unsigned char *iv;
     cypher cypher;
 } password_data;
 
@@ -23,8 +24,7 @@ typedef struct password_data
 int init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_MODE block_mode);
 // Frees iv and key
 void clear_password_data(password_data *password_data);
-int encrypt(password_data *password_data, unsigned char* plain_in, int plain_len, unsigned char * cypher_out);
-int decrypt(password_data *password_data, unsigned char* cypher_in, int cypher_len, unsigned char * plain_out);
-
+int encrypt(password_data *password_data, unsigned char *plain_in, int plain_len, unsigned char *cypher_out);
+int decrypt(password_data *password_data, unsigned char *cypher_in, int cypher_len, unsigned char *plain_out);
 
 #endif
