@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/payload.h"
 
 char *generate_raw_payload(steg_configuration_ptr steg_config, size_t *raw_payload_size)
@@ -82,7 +84,12 @@ int unload_payload(unsigned char *payload, password_data *p_data, int should_enc
             logw(ERROR, "%s\n", "Couldn't allocate memory for final payload.");
             return -1;
         }
-        size_t dec_payload_size = decrypt(p_data, (unsigned char *)payload + 4, payload_size, (unsigned char *)final_payload);
+        int dec_payload_size = decrypt(p_data, (unsigned char *)payload + 4, payload_size, (unsigned char *)final_payload);
+        if (dec_payload_size == -1)
+        {
+            free(final_payload);
+            return -1;
+        }
         final_payload[dec_payload_size] = 0;
         payload_size = (final_payload[0] << 24) + (final_payload[1] << 16) + (final_payload[2] << 8) + final_payload[3];
     }

@@ -13,27 +13,30 @@ int encrypt(password_data *password_data, unsigned char *plain_in, int plain_len
     int len;
     int ciphertext_len;
 
-    if (!(ctx = EVP_CIPHER_CTX_new())){
+    if (!(ctx = EVP_CIPHER_CTX_new()))
+    {
         logw(ERROR, "%s\n", "Couldn't create cipher context.\n");
         return -1;
     }
 
-    if (1 != EVP_EncryptInit_ex(ctx, (password_data->cypher)(), NULL, password_data->key, password_data->iv)){
+    if (1 != EVP_EncryptInit_ex(ctx, (password_data->cypher)(), NULL, password_data->key, password_data->iv))
+    {
         logw(ERROR, "%s\n", "Couldn't initialize encryption.\n");
         EVP_CIPHER_CTX_free(ctx);
         return -1;
     }
 
-    if (1 != EVP_EncryptUpdate(ctx, cypher_out, &len, plain_in, plain_len)){
+    if (1 != EVP_EncryptUpdate(ctx, cypher_out, &len, plain_in, plain_len))
+    {
         logw(ERROR, "%s\n", "Couldn't encrypt body.\n");
         EVP_CIPHER_CTX_free(ctx);
         return -1;
     }
     ciphertext_len = len;
-    logw(DEBUG,"LEN: %d",plain_len);
+    logw(DEBUG, "LEN: %d", plain_len);
 
-
-    if (1 != EVP_EncryptFinal_ex(ctx, cypher_out + len, &len)){
+    if (1 != EVP_EncryptFinal_ex(ctx, cypher_out + len, &len))
+    {
         logw(ERROR, "%s\n", "Couldn't encrypt padding.\n");
         EVP_CIPHER_CTX_free(ctx);
         return -1;
@@ -51,24 +54,30 @@ int decrypt(password_data *password_data, unsigned char *cypher_in, int cypher_l
     int len;
     int plaintext_len;
 
-    if (!(ctx = EVP_CIPHER_CTX_new())){
+    if (!(ctx = EVP_CIPHER_CTX_new()))
+    {
         logw(ERROR, "%s\n", "Couldn't create cipher context.\n");
         return -1;
     }
-    if (1 != EVP_DecryptInit_ex(ctx, (password_data->cypher)(), NULL, password_data->key, password_data->iv)){
+
+    if (1 != EVP_DecryptInit_ex(ctx, (password_data->cypher)(), NULL, password_data->key, password_data->iv))
+    {
         logw(ERROR, "%s\n", "Couldn't initialize decryption.\n");
         EVP_CIPHER_CTX_free(ctx);
         return -1;
     }
 
-    if (1 != EVP_DecryptUpdate(ctx, plain_out, &len, cypher_in, cypher_len)){
+    if (1 != EVP_DecryptUpdate(ctx, plain_out, &len, cypher_in, cypher_len))
+    {
         logw(ERROR, "%s\n", "Couldn't decrypt body.\n");
         EVP_CIPHER_CTX_free(ctx);
         return -1;
     }
     plaintext_len = len;
 
-    if (1 != EVP_DecryptFinal_ex(ctx, plain_out + len, &len)){
+    logw(DEBUG, "LEN: %d", plaintext_len);
+    if (1 != EVP_DecryptFinal_ex(ctx, plain_out + len, &len))
+    {
         logw(ERROR, "%s\n", "Couldn't decrypt padding.\n");
         EVP_CIPHER_CTX_free(ctx);
         return -1;
@@ -101,12 +110,15 @@ int init_password_data_arrs(password_data *password_data, ALGO_MODE algo_mode)
 
 int init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_MODE block_mode)
 {
-    if (password_data->password == NULL){
+    if (password_data->password == NULL)
+    {
         logw(ERROR, "%s\n", "Password should be preloaded.\n");
         return -1;
     }
+    printf("%d %d\n", algo_mode, block_mode);
     password_data->cypher = cyphers[algo_mode][block_mode];
-    if (-1 == init_password_data_arrs(password_data, algo_mode)){
+    if (-1 == init_password_data_arrs(password_data, algo_mode))
+    {
         logw(ERROR, "%s\n", "Couldn't init data for password.\n");
         return -1;
     }
@@ -120,7 +132,7 @@ int init_password_data(password_data *password_data, ALGO_MODE algo_mode, BLOCK_
         1,
         password_data->key,
         password_data->iv);
-    
+
     return 0;
 }
 
@@ -131,7 +143,4 @@ void clear_password_data(password_data *password_data)
         free(password_data->iv);
     if (password_data->key)
         free(password_data->key);
-
-
-        
 }

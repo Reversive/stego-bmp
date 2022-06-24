@@ -206,6 +206,7 @@ unsigned char *extract_payload_from_meta_improved(bitmap_metadata_ptr metadata, 
 
     while (payload_idx < total_size)
     {
+
         SET_BIT_TO(extracted_payload[payload_idx], (7 - payload_bit_idx), get_bit_and_mask(metadata->pixels[component_idx], component_bit_idx, mask, metadata->pixels[component_idx]));
         lsb_pointer_increment(LSB1, &component_idx, &component_bit_idx, &payload_idx, &payload_bit_idx);
     }

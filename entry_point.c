@@ -91,17 +91,14 @@ void exit_clean_up(
     if (steg_config != NULL)
     {
         free(steg_config);
-        steg_config = NULL;
     }
     if (bmp_metadata != NULL)
     {
         if (bmp_metadata->pixels != NULL)
         {
             free(bmp_metadata->pixels);
-            bmp_metadata->pixels = NULL;
         }
         free(bmp_metadata);
-        bmp_metadata = NULL;
     }
     if (carrier_fptr != NULL)
     {

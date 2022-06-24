@@ -123,6 +123,7 @@ steg_configuration_ptr parse_options(
             break;
         case 'm':
             steg_config->block_mode = parse_string_arg(optarg, block_options, 4, NO_BLOCK);
+
             break;
         case 'j':
             steg_config->enc_password = optarg;
